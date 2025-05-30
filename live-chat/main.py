@@ -1,40 +1,116 @@
+import argparse
 import os
 
 from avatar_chat import AUDIO_AVAILABLE, AvatarChat
 
 
+def parse_arguments():
+    """Command line argument parser"""
+    parser = argparse.ArgumentParser(
+        description="AI Avatar Chat System - Interactive chat with AI avatars",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Basic usage with defaults
+  python main.py
+  
+  # Custom configuration
+  python main.py --llm-type gpt-4 --tts-type "azuretts-ko-KR-InJoonNeural-sad" --model-style "indian_m_2_aaryan-side-white_jacket-natural"
+  
+  # With custom prompt and document
+  python main.py --prompt "plp-12345" --document "pld-67890"
+  
+  # Specify capabilities
+  python main.py --capability LLM TTS STT
+        """,
+    )
+
+    # API Configuration
+    parser.add_argument(
+        "--api-server", default="https://live-api.perso.ai", help="API server URL (default: https://live-api.perso.ai)"
+    )
+    parser.add_argument("--api-key", help="API key (if not provided, will use EST_LIVE_API_KEY environment variable)")
+
+    # AI Configuration
+    parser.add_argument("--llm-type", default="gpt-35", help="LLM type to use (default: gpt-35)")
+    parser.add_argument("--tts-type", default="yuri", help="TTS type to use (default: yuri)")
+    parser.add_argument("--stt-type", default="default", help="STT type to use (default: default)")
+    parser.add_argument(
+        "--model-style", default="yuri-front_natural", help="Avatar model style (default: yuri-front_natural)"
+    )
+
+    # Content Configuration
+    parser.add_argument(
+        "--prompt",
+        default="plp-d432cb910983f1eed6511eba836ac14f",
+        help="Prompt ID (default: plp-d432cb910983f1eed6511eba836ac14f)",
+    )
+    parser.add_argument("--document", help="Document ID (optional)")
+    parser.add_argument("--background-image", help="Background image ID (optional)")
+    parser.add_argument(
+        "--capability",
+        nargs="+",
+        default=["LLM", "TTS", "STT"],
+        choices=["LLM", "TTS", "STT", "STF_WEBRTC"],
+        help="Capabilities to enable (default: LLM TTS STT)",
+    )
+
+    return parser.parse_args()
+
+
 def print_menu():
     print("\n" + "=" * 50)
-    print("🤖 AI 아바타 대화 메뉴")
+    print("🤖 AI Avatar Chat Menu")
     print("=" * 50)
-    print("1. 텍스트로 대화하기")
-    print("2. 음성으로 대화하기 (녹음)")
-    print("3. 음성 파일로 대화하기")
-    print("4. 대화 히스토리 보기")
-    print("5. 종료")
+    print("1. Chat with text")
+    print("2. Chat with voice (recording)")
+    print("3. Chat with voice file")
+    print("4. View chat history")
+    print("5. Exit")
     print("=" * 50)
 
 
 def main():
-    # 설정값들 (실제 값으로 변경하세요)
-    API_SERVER = "https://live-api.perso.ai"
-    API_KEY = os.environ.get("EST_LIVE_API_KEY")
-    LLM_TYPE = "gpt-35"
-    TTS_TYPE = "yuri"
-    STT_TYPE = "default"
-    MODEL_STYLE = "yuri-front_natural"
-    PROMPT = "plp-d432cb910983f1eed6511eba836ac14f"
-    DOCUMENT = "pld-be1b50ffd908582d5f5f6fd08c177f6c"
-    CAPABILITY = ["LLM", "TTS", "STT"]
-    BACKGROUND_IMAGE = "plbi-ad61941c14a386803423f2cf7ecb999f"
+    # Parse command line arguments
+    args = parse_arguments()
 
-    print("🚀 AI 아바타 대화 시스템 시작!")
+    # Set up configuration from arguments
+    API_SERVER = args.api_server
+    API_KEY = args.api_key or os.environ.get("EST_LIVE_API_KEY")
+    LLM_TYPE = args.llm_type
+    TTS_TYPE = args.tts_type
+    STT_TYPE = args.stt_type
+    MODEL_STYLE = args.model_style
+    PROMPT = args.prompt
+    DOCUMENT = args.document
+    CAPABILITY = args.capability
+    BACKGROUND_IMAGE = args.background_image
 
-    # 아바타 채팅 초기화
+    if not API_KEY:
+        print(
+            "❌ Error: API key is required. Provide it via --api-key argument or EST_LIVE_API_KEY environment variable."
+        )
+        return 1
+
+    print("🚀 AI Avatar Chat System starting!")
+    print(f"🔗 API Server: {API_SERVER}")
+    print(f"🤖 LLM Type: {LLM_TYPE}")
+    print(f"🔊 TTS Type: {TTS_TYPE}")
+    print(f"🎤 STT Type: {STT_TYPE}")
+    print(f"👤 Model Style: {MODEL_STYLE}")
+    print(f"📝 Prompt ID: {PROMPT}")
+    if DOCUMENT:
+        print(f"📄 Document ID: {DOCUMENT}")
+    if BACKGROUND_IMAGE:
+        print(f"🖼️  Background Image ID: {BACKGROUND_IMAGE}")
+    print(f"⚡ Capabilities: {', '.join(CAPABILITY)}")
+    print("=" * 50)
+
+    # Initialize avatar chat
     chat = AvatarChat(API_SERVER, API_KEY)
 
     try:
-        # 세션 생성 및 시작
+        # Create and start session
         chat.create_session(
             llm_type=LLM_TYPE,
             tts_type=TTS_TYPE,
@@ -47,24 +123,24 @@ def main():
         )
         chat.start_session()
 
-        print("✅ 준비 완료! 아바타와 대화해보세요.")
+        print("✅ Ready! Start chatting with the avatar.")
 
         while True:
             print_menu()
-            choice = input("선택하세요 (1-5): ").strip()
+            choice = input("Choose option (1-5): ").strip()
 
             if choice == "1":
-                # 텍스트 대화
-                print("\n💬 텍스트 대화 모드")
+                # Text chat
+                print("\n💬 Text Chat Mode")
                 while True:
-                    user_input = input("\n👤 입력 (quit으로 메뉴로 돌아가기): ").strip()
+                    user_input = input("\n👤 Input (quit to return to menu): ").strip()
                     if user_input.lower() == "quit" or user_input.lower() == "q":
                         break
                     if user_input:
                         ai_response = chat.chat_text(user_input)
 
-                        # TTS 생성 여부 묻기
-                        tts_choice = input("\n🔊 음성으로도 들어보시겠습니까? (y/N): ").strip().lower()
+                        # Ask if user wants TTS
+                        tts_choice = input("\n🔊 Would you like to hear it as speech? (y/N): ").strip().lower()
                         if tts_choice == "y":
                             import time
 
@@ -73,30 +149,30 @@ def main():
                             chat.play_audio(tts_file)
 
             elif choice == "2":
-                # 음성 대화
+                # Voice chat
                 if not AUDIO_AVAILABLE:
-                    print("❌ pyaudio가 설치되지 않아 음성 기능을 사용할 수 없습니다.")
-                    print("   설치: pip install pyaudio")
+                    print("❌ pyaudio is not installed, voice features are unavailable.")
+                    print("   Install: pip install pyaudio")
                     continue
 
-                print("\n🎤 음성 대화 모드")
-                print("아래에서 Enter를 누르면 녹음이 시작됩니다.")
-                input("준비되면 Enter를 눌러주세요...")
+                print("\n🎤 Voice Chat Mode")
+                print("Press Enter below to start recording.")
+                input("Press Enter when ready...")
 
                 ai_response = chat.voice_chat()
                 if ai_response:
-                    print("\n✅ 대화 완료!")
+                    print("\n✅ Chat completed!")
 
             elif choice == "3":
-                # 음성 파일로 대화
-                print("\n📁 음성 파일 대화 모드")
-                file_path = input("음성 파일 경로를 입력하세요: ").strip()
+                # Voice file chat
+                print("\n📁 Voice File Chat Mode")
+                file_path = input("Enter voice file path: ").strip()
 
                 try:
                     recognized_text = chat.recognize_speech(file_path)
                     ai_response = chat.chat_text(recognized_text)
 
-                    # TTS 생성
+                    # Generate TTS
                     import time
 
                     tts_file = f"ai_response_{int(time.time())}.wav"
@@ -104,38 +180,40 @@ def main():
                     chat.play_audio(tts_file)
 
                 except Exception as e:
-                    print(f"❌ 오류: {e}")
-                    if "세션이 종료되었습니다" in str(e):
-                        print("💡 해결방법: 프로그램을 다시 실행하여 새로운 세션을 시작해주세요.")
+                    print(f"❌ Error: {e}")
+                    if "Session has ended" in str(e):
+                        print("💡 Solution: Restart the program to create a new session.")
 
             elif choice == "4":
-                # 대화 히스토리
-                print("\n📜 대화 히스토리")
+                # Chat history
+                print("\n📜 Chat History")
                 history = chat.get_chat_history()
                 if not history:
-                    print("대화 히스토리가 없습니다.")
+                    print("No chat history available.")
                 else:
                     for i, msg in enumerate(history, 1):
                         role_emoji = "👤" if msg["role"] == "Human" else "🤖"
                         print(f"{i}. {role_emoji} {msg['role']}: {msg['content']}")
 
             elif choice == "5":
-                # 종료
-                print("\n👋 프로그램을 종료합니다.")
+                # Exit
+                print("\n👋 Exiting program.")
                 break
 
             else:
-                print("❌ 잘못된 선택입니다.")
+                print("❌ Invalid choice.")
 
     except KeyboardInterrupt:
-        print("\n\n⚠️  사용자가 중단했습니다.")
+        print("\n\n⚠️  Interrupted by user.")
     except Exception as e:
-        print(f"\n❌ 오류 발생: {e}")
+        print(f"\n❌ Error occurred: {e}")
     finally:
-        # 세션 정리
+        # Clean up session
         chat.end_session()
-        print("🧹 리소스 정리 완료")
+        print("🧹 Resource cleanup completed")
+
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    exit(main())

@@ -15,8 +15,8 @@ try:
     AUDIO_AVAILABLE = True
 except ImportError:
     AUDIO_AVAILABLE = False
-    print("⚠️  pyaudio가 설치되지 않아 실시간 음성 기능이 제한됩니다.")
-    print("   설치: pip install pyaudio")
+    print("⚠️  pyaudio is not installed, real-time audio features are limited.")
+    print("   Install: pip install pyaudio")
 
 
 class AvatarChat:
@@ -26,7 +26,7 @@ class AvatarChat:
         self.session_id: Optional[str] = None
         self.chat_history: list[dict[str, str]] = []
 
-        # 오디오 설정
+        # Audio settings
         self.audio_format = pyaudio.paInt16 if AUDIO_AVAILABLE else None
         self.channels = 1
         self.rate = 16000
@@ -45,8 +45,8 @@ class AvatarChat:
         capability: Optional[list[str]] = None,
         stt_type: Optional[str] = None,
     ) -> Optional[str]:
-        """세션 생성"""
-        print("📝 세션 생성 중...")
+        """Create session"""
+        print("📝 Creating session...")
 
         data: dict = {"llm_type": llm_type, "tts_type": tts_type, "model_style": model_style, "prompt": prompt}
 
@@ -68,36 +68,36 @@ class AvatarChat:
         if response.status_code == 201:
             result = response.json()
             self.session_id = result["session_id"]
-            print(f"✅ 세션 생성됨: {self.session_id}")
+            print(f"✅ Session created: {self.session_id}")
             return self.session_id
         else:
-            raise Exception(f"세션 생성 실패: {response.status_code} - {response.text}")
+            raise Exception(f"Session creation failed: {response.status_code} - {response.text}")
 
     def start_session(self):
-        """세션 시작"""
+        """Start session"""
         if not self.session_id:
-            raise Exception("세션이 생성되지 않았습니다.")
+            raise Exception("Session has not been created.")
 
-        print("🚀 세션 시작 중...")
+        print("🚀 Starting session...")
 
-        # WebRTC 연결이 필요한지 확인 (STF_WEBRTC capability가 있는 경우에만)
-        needs_webrtc = False  # 기본값: WebRTC 불필요
+        # Check if WebRTC connection is needed (only when STF_WEBRTC capability is present)
+        needs_webrtc = False  # Default: WebRTC not required
 
-        # 1. ICE 서버 정보 조회 (WebRTC 필요한 경우만)
+        # 1. ICE server information inquiry (only when WebRTC is needed)
         if needs_webrtc:
             try:
-                print("🧊 ICE 서버 정보 조회 중...")
+                print("🧊 Querying ICE server information...")
                 ice_response = requests.get(f"{self.api_server}/api/v1/session/{self.session_id}/ice-servers/")
                 if ice_response.status_code == 200:
-                    print("✅ ICE 서버 정보 조회 완료")
+                    print("✅ ICE server information query completed")
                 else:
-                    print(f"⚠️  ICE 서버 조회 실패: {ice_response.status_code}")
+                    print(f"⚠️  ICE server query failed: {ice_response.status_code}")
             except Exception as e:
-                print(f"⚠️  ICE 서버 조회 중 오류: {e}")
+                print(f"⚠️  Error during ICE server query: {e}")
 
-            # 2. 가짜 SDP 교환 (WebRTC 연결 시뮬레이션)
+            # 2. Fake SDP exchange (WebRTC connection simulation)
             try:
-                print("🔄 SDP 교환 중...")
+                print("🔄 SDP exchange in progress...")
                 fake_sdp = {
                     "type": "offer",
                     "sdp": "v=0\r\no=- 123456 0 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\nm=audio 9 UDP/TLS/RTP/SAVPF 0\r\nc=IN IP4 0.0.0.0\r\na=inactive\r\n",
@@ -110,15 +110,15 @@ class AvatarChat:
                 )
 
                 if sdp_response.status_code == 200:
-                    print("✅ SDP 교환 완료")
+                    print("✅ SDP exchange completed")
                 else:
-                    print(f"⚠️  SDP 교환 실패: {sdp_response.status_code} - {sdp_response.text}")
+                    print(f"⚠️  SDP exchange failed: {sdp_response.status_code} - {sdp_response.text}")
             except Exception as e:
-                print(f"⚠️  SDP 교환 중 오류: {e}")
+                print(f"⚠️  Error during SDP exchange: {e}")
         else:
-            print("ℹ️  WebRTC 연결 건너뛰기 (API 전용 모드)")
+            print("ℹ️  Skipping WebRTC connection (API-only mode)")
 
-        # 3. 세션 시작 이벤트 전송
+        # 3. Send session start event
         response = requests.post(
             f"{self.api_server}/api/v1/session/{self.session_id}/event/create/",
             headers={"Content-Type": "application/json"},
@@ -126,18 +126,18 @@ class AvatarChat:
         )
 
         if response.status_code == 201:
-            print("✅ 세션이 시작되었습니다.")
+            print("✅ Session has been started.")
         else:
-            raise Exception(f"세션 시작 실패: {response.status_code} - {response.text}")
+            raise Exception(f"Session start failed: {response.status_code} - {response.text}")
 
     def chat_text(self, message: str) -> str:
-        """텍스트로 AI와 대화"""
+        """Chat with AI using text"""
         if not self.session_id:
-            raise Exception("세션이 시작되지 않았습니다.")
+            raise Exception("Session has not been started.")
 
         print(f"👤 You: {message}")
 
-        # 대화 히스토리에 추가
+        # Add to conversation history
         self.chat_history.append({"role": "Human", "content": message})
 
         response = requests.post(
@@ -151,7 +151,7 @@ class AvatarChat:
             print("🤖 AI: ", end="", flush=True)
             ai_response = ""
 
-            # 스트리밍 응답 처리
+            # Process streaming response
             for line in response.iter_lines():
                 if line:
                     line_str = line.decode("utf-8")
@@ -165,20 +165,20 @@ class AvatarChat:
                         except json.JSONDecodeError:
                             continue
 
-            print()  # 줄바꿈
+            print()  # New line
 
-            # 대화 히스토리에 추가
+            # Add to conversation history
             self.chat_history.append({"role": "AI", "content": ai_response})
             return ai_response
         else:
-            raise Exception(f"LLM 요청 실패: {response.status_code} - {response.text}")
+            raise Exception(f"LLM request failed: {response.status_code} - {response.text}")
 
     def generate_speech(self, text: str, save_path: Optional[str] = None) -> bytes:
-        """텍스트를 음성으로 변환"""
+        """Convert text to speech"""
         if not self.session_id:
-            raise Exception("세션이 시작되지 않았습니다.")
+            raise Exception("Session has not been started.")
 
-        print("🔊 음성 생성 중...")
+        print("🔊 Generating speech...")
 
         response = requests.post(
             f"{self.api_server}/api/v1/session/{self.session_id}/tts/",
@@ -193,52 +193,52 @@ class AvatarChat:
             if save_path:
                 with open(save_path, "wb") as f:
                     f.write(audio_data)
-                print(f"💾 음성 파일 저장됨: {save_path}")
+                print(f"💾 Audio file saved: {save_path}")
 
             return audio_data
         else:
-            raise Exception(f"TTS 요청 실패: {response.status_code} - {response.text}")
+            raise Exception(f"TTS request failed: {response.status_code} - {response.text}")
 
     def recognize_speech(self, audio_file_path: str) -> str:
-        """음성 파일을 텍스트로 변환"""
+        """Convert audio file to text"""
         if not self.session_id:
-            raise Exception("세션이 시작되지 않았습니다.")
+            raise Exception("Session has not been started.")
 
-        # 세션 상태 확인
+        # Check session status
         try:
             status = self.get_session_status()
-            print(f"📊 현재 세션 상태: {status}")
+            print(f"📊 Current session status: {status}")
             if status == "TERMINATED":
-                raise Exception("세션이 종료되었습니다. 새로운 세션을 시작해주세요.")
+                raise Exception("Session has been terminated. Please start a new session.")
             elif status != "IN_PROGRESS":
-                print(f"⚠️  세션이 IN_PROGRESS 상태가 아닙니다. 현재: {status}")
+                print(f"⚠️  Session is not in IN_PROGRESS state. Current: {status}")
         except Exception as e:
-            print(f"⚠️  세션 상태 확인 실패: {e}")
+            print(f"⚠️  Session status check failed: {e}")
             raise e
 
-        print("🎤 음성 인식 중...")
+        print("🎤 Recognizing speech...")
 
-        # 오디오 파일 상세 정보 확인
+        # Check audio file details
         try:
             with wave.open(audio_file_path, "rb") as wf:
                 frames = wf.getnframes()
                 sample_rate = wf.getframerate()
                 channels = wf.getnchannels()
                 duration = frames / float(sample_rate)
-                print(f"🎵 오디오 정보: {duration:.2f}초, {sample_rate}Hz, {channels}채널, {frames}프레임")
+                print(f"🎵 Audio info: {duration:.2f}s, {sample_rate}Hz, {channels}ch, {frames}frames")
 
                 if duration < 0.5:
-                    print("⚠️  오디오가 너무 짧습니다. (0.5초 미만)")
+                    print("⚠️  Audio is too short. (Less than 0.5 seconds)")
                 elif duration > 30:
-                    print("⚠️  오디오가 너무 깁니다. (30초 초과)")
+                    print("⚠️  Audio is too long. (More than 30 seconds)")
         except Exception as e:
-            print(f"⚠️  오디오 파일 분석 실패: {e}")
+            print(f"⚠️  Audio file analysis failed: {e}")
 
-        # 오디오 파일을 multipart/form-data로 전송
+        # Send audio file as multipart/form-data
         with open(audio_file_path, "rb") as f:
-            # 파일 크기 확인
+            # Check file size
             file_size = os.path.getsize(audio_file_path)
-            print(f"📁 파일 크기: {file_size} bytes")
+            print(f"📁 File size: {file_size} bytes")
 
             files = {"audio": (os.path.basename(audio_file_path), f, "audio/wav")}
             data = {"language": "ko"}
@@ -247,40 +247,40 @@ class AvatarChat:
                 f"{self.api_server}/api/v1/session/{self.session_id}/stt/",
                 files=files,
                 data=data,
-                timeout=30,  # 30초 타임아웃
+                timeout=30,  # 30 second timeout
                 headers={"User-Agent": "PersoLive-Python-Client/1.0"},
             )
 
-        print(f"📡 응답 상태: {response.status_code}")
+        print(f"📡 Response status: {response.status_code}")
 
-        # 상세한 에러 정보 출력
+        # Output detailed error information
         if response.status_code != 200:
-            print(f"📋 응답 헤더: {dict(response.headers)}")
+            print(f"📋 Response headers: {dict(response.headers)}")
             try:
                 error_detail = response.json()
-                print(f"📝 에러 상세: {error_detail}")
+                print(f"📝 Error details: {error_detail}")
             except:
-                print(f"📝 응답 내용: {response.text[:500]}...")
+                print(f"📝 Response content: {response.text[:500]}...")
 
         if response.status_code == 200:
             result = response.json()
             recognized_text = result["text"]
-            print(f"✅ 인식된 텍스트: {recognized_text}")
+            print(f"✅ Recognized text: {recognized_text}")
             return recognized_text
         else:
-            raise Exception(f"STT 요청 실패: {response.status_code} - {response.text}")
+            raise Exception(f"STT request failed: {response.status_code} - {response.text}")
 
     def start_recording(self):
-        """실시간 음성 녹음 시작"""
+        """Start real-time voice recording"""
         if not AUDIO_AVAILABLE:
-            print("❌ pyaudio가 설치되지 않아 녹음할 수 없습니다.")
+            print("❌ Cannot record because pyaudio is not installed.")
             return
 
         if self.is_recording:
-            print("⚠️  이미 녹음 중입니다.")
+            print("⚠️  Already recording.")
             return
 
-        print("🎤 녹음 시작... (Enter를 눌러 종료)")
+        print("🎤 Recording started... (Press Enter to stop)")
 
         self.is_recording = True
         self.audio_frames = []
@@ -295,14 +295,14 @@ class AvatarChat:
                 data = stream.read(self.chunk)
                 self.audio_frames.append(data)
 
-        # 별도 스레드에서 녹음 실행
+        # Execute recording in separate thread
         record_thread = threading.Thread(target=record)
         record_thread.start()
 
-        # Enter 입력 대기
+        # Wait for Enter input
         input()
 
-        # 녹음 종료
+        # Stop recording
         self.is_recording = False
         record_thread.join()
 
@@ -310,17 +310,17 @@ class AvatarChat:
         stream.close()
         audio.terminate()
 
-        print("🛑 녹음 종료")
+        print("🛑 Recording stopped")
 
-        # WAV 파일로 저장
+        # Save as WAV file
         timestamp = int(time.time())
         audio_file = f"recorded_{timestamp}.wav"
 
-        # 현재 디렉토리 확인
+        # Check current directory
         current_dir = os.getcwd()
         full_path = os.path.abspath(audio_file)
-        print(f"📂 현재 디렉토리: {current_dir}")
-        print(f"📍 파일 저장 경로: {full_path}")
+        print(f"📂 Current directory: {current_dir}")
+        print(f"📍 File save path: {full_path}")
 
         wf = wave.open(audio_file, "wb")
         wf.setnchannels(self.channels)
@@ -329,57 +329,57 @@ class AvatarChat:
         wf.writeframes(b"".join(self.audio_frames))
         wf.close()
 
-        # 저장 확인
+        # Verify save
         if os.path.exists(audio_file):
             file_size = os.path.getsize(audio_file)
-            print(f"💾 녹음 파일 저장됨: {audio_file} ({file_size} bytes)")
+            print(f"💾 Recording file saved: {audio_file} ({file_size} bytes)")
         else:
-            print(f"❌ 파일 저장 실패: {audio_file}")
+            print(f"❌ File save failed: {audio_file}")
 
         return audio_file
 
     def voice_chat(self) -> str:
-        """음성으로 대화 (녹음 → STT → LLM → TTS)"""
-        # 1. 음성 녹음
+        """Voice conversation (Recording → STT → LLM → TTS)"""
+        # 1. Voice recording
         audio_file = self.start_recording()
         if not audio_file:
             return ""
 
-        # 파일 존재 확인
+        # Check file existence
         if not os.path.exists(audio_file):
-            print(f"❌ 녹음 파일을 찾을 수 없습니다: {audio_file}")
+            print(f"❌ Recording file not found: {audio_file}")
             return ""
 
         try:
-            # 2. 음성 인식
+            # 2. Speech recognition
             recognized_text = self.recognize_speech(audio_file)
 
-            # 3. AI와 대화
+            # 3. Chat with AI
             ai_response = self.chat_text(recognized_text)
 
-            # 4. 음성 합성
+            # 4. Speech synthesis
             timestamp = int(time.time())
             tts_file = f"ai_response_{timestamp}.wav"
             self.generate_speech(ai_response, tts_file)
 
-            # 5. 음성 재생 (OS별)
+            # 5. Audio playback (OS-specific)
             self.play_audio(tts_file)
 
             return ai_response
 
         except Exception as e:
-            print(f"❌ 음성 대화 중 오류: {e}")
+            print(f"❌ Error during voice conversation: {e}")
             return ""
 
         finally:
-            # 잠시 후 임시 파일 삭제 (디버깅을 위해 주석 처리)
+            # Preserve temporary files for debugging
             # if os.path.exists(audio_file):
             #     os.remove(audio_file)
-            print(f"🗂️  녹음 파일 보존됨: {audio_file} (디버깅용)")
+            print(f"🗂️  Recording file preserved: {audio_file} (for debugging)")
 
     def play_audio(self, audio_file: str):
-        """음성 파일 재생"""
-        print(f"🔊 음성 재생: {audio_file}")
+        """Play audio file"""
+        print(f"🔊 Playing audio: {audio_file}")
 
         import platform
 
@@ -392,14 +392,14 @@ class AvatarChat:
         elif system == "Windows":
             os.system(f"powershell -c \"(New-Object Media.SoundPlayer '{audio_file}').PlaySync()\"")
         else:
-            print("⚠️  음성 재생을 지원하지 않는 OS입니다.")
+            print("⚠️  Audio playback is not supported on this OS.")
 
     def end_session(self):
-        """세션 종료"""
+        """End session"""
         if not self.session_id:
             return
 
-        print("🛑 세션 종료 중...")
+        print("🛑 Ending session...")
 
         response = requests.post(
             f"{self.api_server}/api/v1/session/{self.session_id}/event/create/",
@@ -408,20 +408,20 @@ class AvatarChat:
         )
 
         if response.status_code == 201:
-            print("✅ 세션이 종료되었습니다.")
+            print("✅ Session has been ended.")
         else:
-            print(f"⚠️  세션 종료 실패: {response.status_code}")
+            print(f"⚠️  Session end failed: {response.status_code}")
 
         self.session_id = None
 
     def get_chat_history(self):
-        """대화 히스토리 반환"""
+        """Return conversation history"""
         return self.chat_history
 
     def get_session_status(self) -> str:
-        """세션 상태 조회"""
+        """Query session status"""
         if not self.session_id:
-            raise Exception("세션이 생성되지 않았습니다.")
+            raise Exception("Session has not been created.")
 
         response = requests.get(f"{self.api_server}/api/v1/session/{self.session_id}/")
 
@@ -429,43 +429,43 @@ class AvatarChat:
             result = response.json()
             return result.get("status", "UNKNOWN")
         else:
-            raise Exception(f"세션 상태 조회 실패: {response.status_code} - {response.text}")
+            raise Exception(f"Session status query failed: {response.status_code} - {response.text}")
 
     def wait_for_session_ready(self, timeout: int = 30):
-        """세션이 IN_PROGRESS 상태가 될 때까지 대기"""
+        """Wait until session becomes IN_PROGRESS state"""
         import time
 
-        print("⏳ 세션이 준비될 때까지 대기 중...")
+        print("⏳ Waiting for session to be ready...")
 
         start_time = time.time()
         while time.time() - start_time < timeout:
             try:
                 status = self.get_session_status()
-                print(f"📊 세션 상태: {status}")
+                print(f"📊 Session status: {status}")
 
                 if status == "IN_PROGRESS":
-                    print("✅ 세션 준비 완료!")
+                    print("✅ Session ready!")
                     return True
                 elif status == "TERMINATED":
-                    raise Exception("세션이 종료되었습니다.")
+                    raise Exception("Session has been terminated.")
 
-                time.sleep(1)  # 1초 대기
+                time.sleep(1)  # Wait 1 second
 
             except Exception as e:
-                print(f"⚠️  상태 확인 중 오류: {e}")
+                print(f"⚠️  Error during status check: {e}")
                 time.sleep(1)
 
-        raise Exception(f"세션이 {timeout}초 내에 준비되지 않았습니다.")
+        raise Exception(f"Session was not ready within {timeout} seconds.")
 
     def recreate_session_if_needed(self):
-        """필요시 세션 재생성"""
+        """Recreate session if needed"""
         try:
             status = self.get_session_status()
             if status == "TERMINATED":
-                print("🔄 세션이 종료되어 새로운 세션을 생성합니다...")
-                return False  # 재생성 필요
+                print("🔄 Session has been terminated, creating a new session...")
+                return False  # Recreation needed
         except:
-            print("🔄 세션 상태 확인 실패, 새로운 세션을 생성합니다...")
-            return False  # 재생성 필요
+            print("🔄 Session status check failed, creating a new session...")
+            return False  # Recreation needed
 
-        return True  # 기존 세션 사용 가능
+        return True  # Existing session can be used
