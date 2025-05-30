@@ -1,5 +1,6 @@
 import argparse
 import os
+import time
 
 from avatar_chat import AUDIO_AVAILABLE, AvatarChat
 
@@ -142,8 +143,6 @@ def main():
                         # Ask if user wants TTS
                         tts_choice = input("\n🔊 Would you like to hear it as speech? (y/N): ").strip().lower()
                         if tts_choice == "y":
-                            import time
-
                             tts_file = f"ai_response_{int(time.time())}.wav"
                             chat.generate_speech(ai_response, tts_file)
                             chat.play_audio(tts_file)
@@ -173,8 +172,6 @@ def main():
                     ai_response = chat.chat_text(recognized_text)
 
                     # Generate TTS
-                    import time
-
                     tts_file = f"ai_response_{int(time.time())}.wav"
                     chat.generate_speech(ai_response, tts_file)
                     chat.play_audio(tts_file)

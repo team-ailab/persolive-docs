@@ -25,6 +25,7 @@ class AvatarChat:
         self.api_key = api_key
         self.session_id: Optional[str] = None
         self.chat_history: list[dict[str, str]] = []
+        self.capability: list[str] = []  # Store capability information
 
         # Audio settings
         self.audio_format = pyaudio.paInt16 if AUDIO_AVAILABLE else None
@@ -55,7 +56,14 @@ class AvatarChat:
         if background_image:
             data["background_image"] = background_image
         if capability:
-            data["capability"] = capability
+            # Filter out STF_WEBRTC for API-only mode compatibility
+            filtered_capability = [cap for cap in capability if cap != "STF_WEBRTC"]
+            if filtered_capability:
+                data["capability"] = filtered_capability
+            self.capability = capability  # Store original for later use
+
+            if "STF_WEBRTC" in capability:
+                print("ℹ️  STF_WEBRTC capability will be handled in API-only mode")
         if stt_type:
             data["stt_type"] = stt_type
 
@@ -81,7 +89,11 @@ class AvatarChat:
         print("🚀 Starting session...")
 
         # Check if WebRTC connection is needed (only when STF_WEBRTC capability is present)
-        needs_webrtc = False  # Default: WebRTC not required
+        needs_webrtc = False  # Always skip WebRTC for API-only mode
+
+        # Note: STF_WEBRTC capability is supported but WebRTC connection is skipped for simplicity
+        if "STF_WEBRTC" in self.capability:
+            print("ℹ️  STF_WEBRTC capability detected, but using API-only mode for compatibility")
 
         # 1. ICE server information inquiry (only when WebRTC is needed)
         if needs_webrtc:
