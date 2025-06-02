@@ -11,7 +11,7 @@ The AI Avatar Chat API enables real-time interactive conversations with AI avata
 - **Large Language Model (LLM)** integration for intelligent responses
 - **Avatar visualization** with customizable model styles and backgrounds
 - **Live voice chat** with real-time audio recording and playback
-- **Flexible capability selection** (LLM, TTS, STT, STF_WEBRTC)
+- **Flexible capability selection** (LLM, TTS, STT, STF_WEBRTC for browser streaming)
 
 ## Prerequisites
 
@@ -90,6 +90,27 @@ python main.py --model-style "indian_m_2_aaryan-side-white_jacket-natural"
 python main.py --prompt "plp-12345" --document "pld-67890"
 ```
 
+**Avatar visualization configuration:**
+```bash
+# Custom avatar positioning
+python main.py --model-style "yuri-front_natural" --padding-left 0.2 --padding-top 0.1 --padding-height 1.5
+
+# With background image
+python main.py --background-image "pbi-12345" --model-style "korean_f_1_soohyun-side-pink_cardigan-natural"
+
+# Specify agent identifier
+python main.py --agent "custom-agent-1"
+```
+
+**Settings discovery:**
+```bash
+# Check available TTS types
+python main.py --list-settings tts_type
+
+# Check available model styles  
+python main.py --list-settings modelstyle
+```
+
 **API server configuration:**
 ```bash
 # Use custom API server
@@ -102,7 +123,9 @@ python main.py --api-key "your-api-key"
 **Capability selection:**
 ```bash
 # Enable only specific capabilities
-python main.py --capability LLM TTS
+python main.py --capability LLM TTS STT
+
+# For browser WebRTC streaming (required for avatar visualization)
 python main.py --capability LLM TTS STT STF_WEBRTC
 ```
 
@@ -328,6 +351,28 @@ Gracefully terminates the chat session.
 ]
 ```
 
+### 9. Get Video Stream URL
+
+**Endpoint:** `GET /api/v1/session/{session_id}/`
+
+Retrieves video stream information for avatar visualization.
+
+**Response:**
+```json
+{
+    "session_id": "string",
+    "status": "string",
+    "stream_url": "string",
+    "model_style": {
+        "name": "string",
+        "display_name": "string"
+    },
+    "background_image": "string"
+}
+```
+
+**Note:** Full avatar visualization with WebRTC video streaming is best experienced through the web SDK in a browser environment. The Python implementation provides configuration and session management capabilities.
+
 ## Common Configuration Values
 
 ### LLM Types
@@ -358,7 +403,7 @@ Available capability options:
 - `LLM` - Large Language Model for text conversations
 - `TTS` - Text-to-Speech for audio generation
 - `STT` - Speech-to-Text for voice input
-- `STF_WEBRTC` - Speech-to-Face with WebRTC for real-time video
+- `STF_WEBRTC` - Speech-to-Face with WebRTC for real-time video streaming (required for browser avatar visualization)
 
 ### Session Status Values
 - **CREATED**: Session created but not started
@@ -391,7 +436,20 @@ The script provides an interactive menu with the following options:
 2. **Chat with voice (recording)** - Record voice messages (requires pyaudio)
 3. **Chat with voice file** - Upload and process audio files
 4. **View chat history** - Display conversation history
-5. **Exit** - Clean up and terminate the session
+5. **Launch avatar visualization** - Start real-time avatar experience in browser
+6. **Check available settings** - Browse available TTS types and model styles
+7. **Exit** - Clean up and terminate the session
+
+### Avatar Visualization Features
+
+- **Model style selection** - Choose from various avatar appearances and poses
+- **Background customization** - Set custom background images for the avatar
+- **Position control** - Adjust avatar positioning with padding parameters:
+  - `padding_left`: Horizontal position (-1.0 to 1.0)
+  - `padding_top`: Vertical position (0.0 to 1.0) 
+  - `padding_height`: Avatar size scaling (0 to 5)
+- **Settings discovery** - Query available TTS types and model styles
+- **Configuration viewing** - Inspect current session and avatar settings
 
 ## Best Practices
 

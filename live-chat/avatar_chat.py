@@ -45,8 +45,12 @@ class AvatarChat:
         background_image: Optional[str] = None,
         capability: Optional[list[str]] = None,
         stt_type: Optional[str] = None,
+        padding_left: Optional[float] = None,
+        padding_top: Optional[float] = None,
+        padding_height: Optional[float] = None,
+        agent: Optional[str] = None,
     ) -> Optional[str]:
-        """Create session"""
+        """Create session with avatar visualization options"""
         print("📝 Creating session...")
 
         data: dict = {"llm_type": llm_type, "tts_type": tts_type, "model_style": model_style, "prompt": prompt}
@@ -56,16 +60,20 @@ class AvatarChat:
         if background_image:
             data["background_image"] = background_image
         if capability:
-            # Filter out STF_WEBRTC for API-only mode compatibility
-            filtered_capability = [cap for cap in capability if cap != "STF_WEBRTC"]
-            if filtered_capability:
-                data["capability"] = filtered_capability
-            self.capability = capability  # Store original for later use
-
-            if "STF_WEBRTC" in capability:
-                print("ℹ️  STF_WEBRTC capability will be handled in API-only mode")
+            data["capability"] = capability
+            self.capability = capability  # Store for later use
         if stt_type:
             data["stt_type"] = stt_type
+
+        # Avatar positioning parameters
+        if padding_left is not None:
+            data["padding_left"] = padding_left
+        if padding_top is not None:
+            data["padding_top"] = padding_top
+        if padding_height is not None:
+            data["padding_height"] = padding_height
+        if agent:
+            data["agent"] = agent
 
         response = requests.post(
             f"{self.api_server}/api/v1/session/",
@@ -88,49 +96,7 @@ class AvatarChat:
 
         print("🚀 Starting session...")
 
-        # Check if WebRTC connection is needed (only when STF_WEBRTC capability is present)
-        needs_webrtc = False  # Always skip WebRTC for API-only mode
-
-        # Note: STF_WEBRTC capability is supported but WebRTC connection is skipped for simplicity
-        if "STF_WEBRTC" in self.capability:
-            print("ℹ️  STF_WEBRTC capability detected, but using API-only mode for compatibility")
-
-        # 1. ICE server information inquiry (only when WebRTC is needed)
-        if needs_webrtc:
-            try:
-                print("🧊 Querying ICE server information...")
-                ice_response = requests.get(f"{self.api_server}/api/v1/session/{self.session_id}/ice-servers/")
-                if ice_response.status_code == 200:
-                    print("✅ ICE server information query completed")
-                else:
-                    print(f"⚠️  ICE server query failed: {ice_response.status_code}")
-            except Exception as e:
-                print(f"⚠️  Error during ICE server query: {e}")
-
-            # 2. Fake SDP exchange (WebRTC connection simulation)
-            try:
-                print("🔄 SDP exchange in progress...")
-                fake_sdp = {
-                    "type": "offer",
-                    "sdp": "v=0\r\no=- 123456 0 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\nm=audio 9 UDP/TLS/RTP/SAVPF 0\r\nc=IN IP4 0.0.0.0\r\na=inactive\r\n",
-                }
-
-                sdp_response = requests.post(
-                    f"{self.api_server}/api/v1/session/{self.session_id}/exchange/",
-                    headers={"Content-Type": "application/json"},
-                    json={"client_sdp": fake_sdp},
-                )
-
-                if sdp_response.status_code == 200:
-                    print("✅ SDP exchange completed")
-                else:
-                    print(f"⚠️  SDP exchange failed: {sdp_response.status_code} - {sdp_response.text}")
-            except Exception as e:
-                print(f"⚠️  Error during SDP exchange: {e}")
-        else:
-            print("ℹ️  Skipping WebRTC connection (API-only mode)")
-
-        # 3. Send session start event
+        # Send session start event
         response = requests.post(
             f"{self.api_server}/api/v1/session/{self.session_id}/event/create/",
             headers={"Content-Type": "application/json"},
@@ -481,3 +447,90 @@ class AvatarChat:
             return False  # Recreation needed
 
         return True  # Existing session can be used
+
+    def get_available_settings(self, setting_type: str) -> list[dict]:
+        """Get available settings (TTS types, model styles, etc.)"""
+        print(f"🔍 Getting available {setting_type}...")
+
+        response = requests.get(
+            f"{self.api_server}/api/v1/settings/{setting_type}/",
+            headers={"PersoLive-APIKey": self.api_key},
+        )
+
+        if response.status_code == 200:
+            result = response.json()
+            print(f"✅ Retrieved {len(result)} {setting_type} options")
+            return result
+        else:
+            raise Exception(f"Failed to get {setting_type}: {response.status_code} - {response.text}")
+
+    def get_video_stream_url(self) -> Optional[str]:
+        """Get WebRTC video stream information for avatar visualization"""
+        if not self.session_id:
+            raise Exception("Session has not been created.")
+
+        try:
+            # Get session info
+            response = requests.get(
+                f"{self.api_server}/api/v1/session/{self.session_id}/",
+                headers={"PersoLive-APIKey": self.api_key},
+            )
+
+            if response.status_code == 200:
+                result = response.json()
+                session_status = result.get("status", "UNKNOWN")
+
+                print("ℹ️  Avatar video visualization requires WebRTC connection")
+                print("🌐 For full avatar experience, use one of these options:")
+                print("   1. SDK Documentation: https://est-perso-live.github.io/perso-live-sdk/js/")
+                print(f"   2. Your API Server: {self.api_server}")
+                print("🎭 Steps to use with browser:")
+                print("   - Copy the perso-live-sdk-sample/js/src/ folder")
+                print("   - Open index.html in Chrome browser")
+                print("   - Enter your API key and configure settings")
+
+                # Return session info instead of non-working URL
+                return {
+                    "session_id": self.session_id,
+                    "status": session_status,
+                    "webrtc_required": True,
+                    "sdk_docs": "https://est-perso-live.github.io/perso-live-sdk/js/",
+                    "api_server": self.api_server,
+                    "instructions": "Use perso-live-sdk-sample/js/src/index.html in browser",
+                }
+            else:
+                print(f"⚠️  Could not get session info: {response.status_code}")
+                return None
+
+        except Exception as e:
+            print(f"⚠️  Error getting session info: {e}")
+            return None
+
+    def get_avatar_configuration(self) -> dict:
+        """Get current avatar configuration including model style and background"""
+        if not self.session_id:
+            raise Exception("Session has not been created.")
+
+        try:
+            response = requests.get(
+                f"{self.api_server}/api/v1/session/{self.session_id}/",
+                headers={"PersoLive-APIKey": self.api_key},
+            )
+
+            if response.status_code == 200:
+                result = response.json()
+                config = {
+                    "session_id": result.get("session_id"),
+                    "status": result.get("status"),
+                    "model_style": result.get("model_style", {}),
+                    "background_image": result.get("background_image"),
+                    "capabilities": self.capability,
+                    "created_at": result.get("created_at"),
+                }
+                return config
+            else:
+                raise Exception(f"Failed to get avatar configuration: {response.status_code} - {response.text}")
+
+        except Exception as e:
+            print(f"❌ Error getting avatar configuration: {e}")
+            return {"error": str(e)}
