@@ -42,36 +42,22 @@ class AvatarChat:
         model_style: str,
         prompt: str,
         document: Optional[str] = None,
-        background_image: Optional[str] = None,
         capability: Optional[list[str]] = None,
         stt_type: Optional[str] = None,
-        padding_left: Optional[float] = None,
-        padding_top: Optional[float] = None,
-        padding_height: Optional[float] = None,
         agent: Optional[str] = None,
     ) -> Optional[str]:
-        """Create session with avatar visualization options"""
+        """Create session for text and voice chat"""
         print("📝 Creating session...")
 
         data: dict = {"llm_type": llm_type, "tts_type": tts_type, "model_style": model_style, "prompt": prompt}
 
         if document:
             data["document"] = document
-        if background_image:
-            data["background_image"] = background_image
         if capability:
             data["capability"] = capability
             self.capability = capability  # Store for later use
         if stt_type:
             data["stt_type"] = stt_type
-
-        # Avatar positioning parameters
-        if padding_left is not None:
-            data["padding_left"] = padding_left
-        if padding_top is not None:
-            data["padding_top"] = padding_top
-        if padding_height is not None:
-            data["padding_height"] = padding_height
         if agent:
             data["agent"] = agent
 
@@ -465,72 +451,27 @@ class AvatarChat:
             raise Exception(f"Failed to get {setting_type}: {response.status_code} - {response.text}")
 
     def get_video_stream_url(self) -> Optional[str]:
-        """Get WebRTC video stream information for avatar visualization"""
-        if not self.session_id:
-            raise Exception("Session has not been created.")
+        """Get browser avatar visualization information (no Python session required)"""
+        print("🎭 Browser Avatar Visualization Mode")
+        print("ℹ️  This mode uses browser-only WebRTC - no Python session required")
+        print("🌐 Browser will create its own independent session")
+        print()
+        print("📋 Steps to launch avatar visualization:")
+        print("   1. Open: ./perso-live-sdk-sample/js/src/index.html")
+        print("   2. Configure API settings:")
+        print(f"      - API Server: {self.api_server}")
+        print("      - API Key: [your-api-key]")
+        print("   3. Select avatar model, TTS type, and other preferences")
+        print("   4. Click START to create new browser session")
+        print("   5. Enjoy real-time avatar chat with WebRTC video!")
+        print()
+        print("📖 SDK Documentation: https://est-perso-live.github.io/perso-live-sdk/js/")
 
-        try:
-            # Get session info
-            response = requests.get(
-                f"{self.api_server}/api/v1/session/{self.session_id}/",
-                headers={"PersoLive-APIKey": self.api_key},
-            )
-
-            if response.status_code == 200:
-                result = response.json()
-                session_status = result.get("status", "UNKNOWN")
-
-                print("ℹ️  Avatar video visualization requires WebRTC connection")
-                print("🌐 For full avatar experience, use one of these options:")
-                print("   1. SDK Documentation: https://est-perso-live.github.io/perso-live-sdk/js/")
-                print(f"   2. Your API Server: {self.api_server}")
-                print("🎭 Steps to use with browser:")
-                print("   - Copy the perso-live-sdk-sample/js/src/ folder")
-                print("   - Open index.html in Chrome browser")
-                print("   - Enter your API key and configure settings")
-
-                # Return session info instead of non-working URL
-                return {
-                    "session_id": self.session_id,
-                    "status": session_status,
-                    "webrtc_required": True,
-                    "sdk_docs": "https://est-perso-live.github.io/perso-live-sdk/js/",
-                    "api_server": self.api_server,
-                    "instructions": "Use perso-live-sdk-sample/js/src/index.html in browser",
-                }
-            else:
-                print(f"⚠️  Could not get session info: {response.status_code}")
-                return None
-
-        except Exception as e:
-            print(f"⚠️  Error getting session info: {e}")
-            return None
-
-    def get_avatar_configuration(self) -> dict:
-        """Get current avatar configuration including model style and background"""
-        if not self.session_id:
-            raise Exception("Session has not been created.")
-
-        try:
-            response = requests.get(
-                f"{self.api_server}/api/v1/session/{self.session_id}/",
-                headers={"PersoLive-APIKey": self.api_key},
-            )
-
-            if response.status_code == 200:
-                result = response.json()
-                config = {
-                    "session_id": result.get("session_id"),
-                    "status": result.get("status"),
-                    "model_style": result.get("model_style", {}),
-                    "background_image": result.get("background_image"),
-                    "capabilities": self.capability,
-                    "created_at": result.get("created_at"),
-                }
-                return config
-            else:
-                raise Exception(f"Failed to get avatar configuration: {response.status_code} - {response.text}")
-
-        except Exception as e:
-            print(f"❌ Error getting avatar configuration: {e}")
-            return {"error": str(e)}
+        return {
+            "mode": "browser_only",
+            "python_session_required": False,
+            "browser_path": "./perso-live-sdk-sample/js/src/index.html",
+            "api_server": self.api_server,
+            "sdk_docs": "https://est-perso-live.github.io/perso-live-sdk/js/",
+            "instructions": "Browser will create independent session - no Python session needed",
+        }

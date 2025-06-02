@@ -1,80 +1,79 @@
-# AI Avatar Chat API Guide
+# AI Avatar Chat System
+
+The AI Avatar Chat System provides an interactive Python interface for real-time conversations with AI avatars. It supports text chat, voice conversations, and browser-based avatar visualization through WebRTC.
 
 ## Overview
 
-The AI Avatar Chat API enables real-time interactive conversations with AI avatars. This system combines multiple AI technologies to create immersive chat experiences. Key features include:
-
-- **Session-based chat** with persistent conversation history
-- **Multi-modal interaction** supporting text, voice, and visual communication
-- **Real-time Text-to-Speech (TTS)** with natural-sounding avatar voices
-- **Speech-to-Text (STT)** for voice input processing
-- **Large Language Model (LLM)** integration for intelligent responses
-- **Avatar visualization** with customizable model styles and backgrounds
-- **Live voice chat** with real-time audio recording and playback
-- **Flexible capability selection** (LLM, TTS, STT, STF_WEBRTC for browser streaming)
+This system enables:
+- **Text Chat**: Type messages and receive AI responses
+- **Voice Chat**: Record voice messages and receive audio responses  
+- **Voice File Processing**: Upload audio files for speech recognition
+- **Settings Discovery**: Browse available TTS types and model styles
+- **Browser Avatar Visualization**: Real-time avatar chat with WebRTC video streaming
 
 ## Prerequisites
 
-You need an API key issued by Perso.ai to use this service. Please contact our support team to obtain your API credentials.
-
-- API Key: Contact Perso.ai support team
-- Base URL: `https://live-api.perso.ai`
+- Python 3.7+
+- API key for the Perso.ai Live API service
+- Optional: `pyaudio` for voice recording features
+- Modern web browser (Chrome/Firefox) for avatar visualization
 
 ## Installation
 
-**Python Version:** 3.8 or higher
+1. **Install Python dependencies:**
+   ```bash
+   pip install requests
+   
+   # Optional: for voice recording features
+   pip install pyaudio
+   ```
 
-**Required packages:**
-```bash
-pip install requests
-```
-
-**Optional package for voice features:**
-```bash
-pip install pyaudio  # Required for real-time voice recording
-```
-
-The script uses the `requests` library for HTTP communication and standard Python libraries. The `pyaudio` package is only needed for real-time voice recording functionality.
+2. **Set up API credentials:**
+   ```bash
+   # Set environment variable
+   export EST_LIVE_API_KEY="your-api-key-here"
+   
+   # Or pass as command line argument
+   python main.py --api-key "your-api-key-here"
+   ```
 
 ## Authentication
 
-You must include your API key in the request headers as follows:
+The system supports two authentication methods:
 
-```python
-headers = {
-    "Content-Type": "application/json",
-    "PersoLive-APIKey": os.environ.get("EST_LIVE_API_KEY"),
-}
-```
+1. **Environment Variable (Recommended):**
+   ```bash
+   export EST_LIVE_API_KEY="your-api-key-here"
+   python main.py
+   ```
 
-**Environment Setup:**
-```bash
-export EST_LIVE_API_KEY="your-api-key-here"
-```
+2. **Command Line Argument:**
+   ```bash
+   python main.py --api-key "your-api-key-here"
+   ```
 
 ## Quick Start
 
-### Basic Interactive Chat
+### Basic Usage
 
-The `main.py` script provides a complete interactive chat interface:
-
-1. **Basic usage with defaults:**
+1. **Start the interactive system:**
    ```bash
    python main.py
    ```
 
 2. **The script will:**
-   - Create a new chat session with the AI avatar
-   - Start an interactive menu system
-   - Provide multiple chat modes (text, voice, file)
-   - Maintain conversation history
+   - Show an interactive menu system
+   - Create sessions only when needed (lazy loading)
+   - Provide multiple chat modes and browser avatar guidance
    - Clean up resources when finished
 
-3. **Available chat modes:**
+3. **Available menu options:**
    - **Text Chat**: Type messages and receive text responses
    - **Voice Chat**: Record voice messages and receive audio responses
    - **Voice File Chat**: Upload audio files for processing
    - **Chat History**: View previous conversation messages
+   - **Launch Avatar Visualization**: Get guidance for browser-based avatar chat
+   - **Check Available Settings**: Browse available TTS types and model styles
 
 ### Configuration Options
 
@@ -88,18 +87,6 @@ python main.py --model-style "indian_m_2_aaryan-side-white_jacket-natural"
 
 # Specify custom prompt and document
 python main.py --prompt "plp-12345" --document "pld-67890"
-```
-
-**Avatar visualization configuration:**
-```bash
-# Custom avatar positioning
-python main.py --model-style "yuri-front_natural" --padding-left 0.2 --padding-top 0.1 --padding-height 1.5
-
-# With background image
-python main.py --background-image "pbi-12345" --model-style "korean_f_1_soohyun-side-pink_cardigan-natural"
-
-# Specify agent identifier
-python main.py --agent "custom-agent-1"
 ```
 
 **Settings discovery:**
@@ -122,11 +109,12 @@ python main.py --api-key "your-api-key"
 
 **Capability selection:**
 ```bash
-# Enable only specific capabilities
+# Use default capabilities (recommended)
 python main.py --capability LLM TTS STT
 
-# For browser WebRTC streaming (required for avatar visualization)
-python main.py --capability LLM TTS STT STF_WEBRTC
+# Enable subset of capabilities  
+python main.py --capability LLM TTS  # Text-only mode
+python main.py --capability LLM      # Chat without audio
 ```
 
 ### Complete Workflow Example
@@ -152,13 +140,13 @@ python main.py --capability LLM TTS STT STF_WEBRTC
    # Record your voice message and receive audio response
    ```
 
-3. **Step 3 - Advanced Configuration:**
+3. **Step 3 - Browser Avatar Visualization:**
    ```bash
-   # Use Korean TTS with specific avatar
-   python main.py --tts-type "azuretts-ko-KR-InJoonNeural-sad" --model-style "yuri-front_natural"
+   # Start the system
+   python main.py
    
-   # Custom prompt for specific use case
-   python main.py --prompt "plp-customer-service" --document "pld-knowledge-base"
+   # Choose option 5 (Launch Avatar Visualization)
+   # Follow the guidance to open browser-based avatar chat
    ```
 
 ## API Reference
@@ -399,11 +387,12 @@ Popular avatar model styles include:
 - `korean_f_1_soohyun-side-pink_cardigan-natural` - Korean female avatar, casual style
 
 ### Capabilities
-Available capability options:
+Available capability options for Python sessions:
 - `LLM` - Large Language Model for text conversations
 - `TTS` - Text-to-Speech for audio generation
 - `STT` - Speech-to-Text for voice input
-- `STF_WEBRTC` - Speech-to-Face with WebRTC for real-time video streaming (required for browser avatar visualization)
+
+**Note:** Browser avatar visualization uses independent WebRTC capabilities managed by the web SDK.
 
 ### Session Status Values
 - **CREATED**: Session created but not started

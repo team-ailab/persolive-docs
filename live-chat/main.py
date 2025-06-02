@@ -24,9 +24,6 @@ Examples:
   # Specify capabilities
   python main.py --capability LLM TTS STT
   
-  # Avatar visualization with custom positioning
-  python main.py --model-style "yuri-front_natural" --background-image "pbi-12345" --padding-left 0.2 --padding-top 0.1 --padding-height 1.5
-  
   # Check available settings
   python main.py --list-settings tts_type
   python main.py --list-settings modelstyle
@@ -53,20 +50,14 @@ Examples:
         default="plp-d432cb910983f1eed6511eba836ac14f",
         help="Prompt ID (default: plp-d432cb910983f1eed6511eba836ac14f)",
     )
-    parser.add_argument("--document", help="Document ID (optional)")
-    parser.add_argument("--background-image", help="Background image ID (optional)")
+    parser.add_argument("--document", help="Document ID for AI context (optional)")
     parser.add_argument(
         "--capability",
         nargs="+",
         default=["LLM", "TTS", "STT"],
-        choices=["LLM", "TTS", "STT", "STF_WEBRTC"],
-        help="Capabilities to enable (default: LLM TTS STT). Add STF_WEBRTC for browser WebRTC streaming",
+        choices=["LLM", "TTS", "STT"],
+        help="Capabilities to enable for Python session (default: LLM TTS STT)",
     )
-
-    # Avatar Visualization Configuration
-    parser.add_argument("--padding-left", type=float, help="Avatar padding left (-1.0 to 1.0)")
-    parser.add_argument("--padding-top", type=float, help="Avatar padding top (0.0 to 1.0)")
-    parser.add_argument("--padding-height", type=float, help="Avatar padding height (0 to 5)")
     parser.add_argument("--agent", help="Agent identifier (optional)")
 
     # Settings Query
@@ -126,10 +117,6 @@ def main():
     PROMPT = args.prompt
     DOCUMENT = args.document
     CAPABILITY = args.capability
-    BACKGROUND_IMAGE = args.background_image
-    PADDING_LEFT = args.padding_left
-    PADDING_TOP = args.padding_top
-    PADDING_HEIGHT = args.padding_height
     AGENT = args.agent
 
     if not API_KEY:
@@ -140,52 +127,43 @@ def main():
 
     print("🚀 AI Avatar Chat System starting!")
     print(f"🔗 API Server: {API_SERVER}")
-    print(f"🤖 LLM Type: {LLM_TYPE}")
-    print(f"🔊 TTS Type: {TTS_TYPE}")
-    print(f"🎤 STT Type: {STT_TYPE}")
-    print(f"👤 Model Style: {MODEL_STYLE}")
-    print(f"📝 Prompt ID: {PROMPT}")
-    if DOCUMENT:
-        print(f"📄 Document ID: {DOCUMENT}")
-    if BACKGROUND_IMAGE:
-        print(f"🖼️  Background Image ID: {BACKGROUND_IMAGE}")
-    if PADDING_LEFT is not None:
-        print(f"⬅️  Padding Left: {PADDING_LEFT}")
-    if PADDING_TOP is not None:
-        print(f"⬆️  Padding Top: {PADDING_TOP}")
-    if PADDING_HEIGHT is not None:
-        print(f"📏 Padding Height: {PADDING_HEIGHT}")
-    if AGENT:
-        print(f"🤖 Agent: {AGENT}")
-    print(f"⚡ Capabilities: {', '.join(CAPABILITY)}")
     print("=" * 50)
 
-    # Initialize avatar chat
+    # Initialize avatar chat instance (but don't create session yet)
     chat = AvatarChat(API_SERVER, API_KEY)
+    session_created = False
 
     try:
-        # Create and start session
-        chat.create_session(
-            llm_type=LLM_TYPE,
-            tts_type=TTS_TYPE,
-            stt_type=STT_TYPE,
-            model_style=MODEL_STYLE,
-            prompt=PROMPT,
-            document=DOCUMENT,
-            capability=CAPABILITY,
-            background_image=BACKGROUND_IMAGE,
-            padding_left=PADDING_LEFT,
-            padding_top=PADDING_TOP,
-            padding_height=PADDING_HEIGHT,
-            agent=AGENT,
-        )
-        chat.start_session()
-
-        print("✅ Ready! Start chatting with the avatar.")
-
         while True:
             print_menu()
             choice = input("Choose option (1-7): ").strip()
+
+            # For options that need Python session, create it if not exists
+            if choice in ["1", "2", "3", "4", "6"] and not session_created:
+                print(f"🤖 LLM Type: {LLM_TYPE}")
+                print(f"🔊 TTS Type: {TTS_TYPE}")
+                print(f"🎤 STT Type: {STT_TYPE}")
+                print(f"👤 Model Style: {MODEL_STYLE}")
+                print(f"📝 Prompt ID: {PROMPT}")
+                if DOCUMENT:
+                    print(f"📄 Document ID: {DOCUMENT}")
+                print(f"⚡ Capabilities: {', '.join(CAPABILITY)}")
+                print("=" * 50)
+
+                # Create and start session
+                chat.create_session(
+                    llm_type=LLM_TYPE,
+                    tts_type=TTS_TYPE,
+                    stt_type=STT_TYPE,
+                    model_style=MODEL_STYLE,
+                    prompt=PROMPT,
+                    document=DOCUMENT,
+                    capability=CAPABILITY,
+                    agent=AGENT,
+                )
+                chat.start_session()
+                session_created = True
+                print("✅ Ready! Start chatting with the avatar.")
 
             if choice == "1":
                 # Text chat
@@ -241,58 +219,36 @@ def main():
             elif choice == "4":
                 # Chat history
                 print("\n📜 Chat History")
-                history = chat.get_chat_history()
-                if not history:
-                    print("No chat history available.")
+                if not session_created:
+                    print("No session created yet. No chat history available.")
                 else:
-                    for i, msg in enumerate(history, 1):
-                        role_emoji = "👤" if msg["role"] == "Human" else "🤖"
-                        print(f"{i}. {role_emoji} {msg['role']}: {msg['content']}")
+                    history = chat.get_chat_history()
+                    if not history:
+                        print("No chat history available.")
+                    else:
+                        for i, msg in enumerate(history, 1):
+                            role_emoji = "👤" if msg["role"] == "Human" else "🤖"
+                            print(f"{i}. {role_emoji} {msg['role']}: {msg['content']}")
 
             elif choice == "5":
-                # Launch avatar visualization
-                print("\n🎭 Launching Avatar Visualization")
-                print("🚀 Preparing real-time avatar experience...")
+                # Launch avatar visualization (browser-only mode - no Python session needed)
+                print("\n🎭 Browser Avatar Visualization (Independent Mode)")
+                print("ℹ️  This mode uses browser-only WebRTC - no Python session required")
+                print("🔄 Browser creates its own session - independent from any Python session")
+
                 try:
-                    config = chat.get_avatar_configuration()
-                    if "error" in config:
-                        print(f"❌ Error: {config['error']}")
-                    else:
-                        print(f"🆔 Session ID: {config.get('session_id', 'N/A')}")
-                        print(f"📊 Status: {config.get('status', 'N/A')}")
-
-                        model_style = config.get("model_style", {})
-                        if model_style:
-                            print(
-                                f"👤 Avatar: {model_style.get('display_name', 'N/A')} ({model_style.get('name', 'N/A')})"
-                            )
-
-                        bg_image = config.get("background_image")
-                        if bg_image:
-                            print(f"🖼️  Background: {bg_image}")
-                        else:
-                            print("🖼️  Background: Default")
-
-                        capabilities = config.get("capabilities", [])
-                        print(f"⚡ Active Features: {', '.join(capabilities)}")
-
-                        created_at = config.get("created_at")
-                        if created_at:
-                            print(f"🕐 Session Started: {created_at}")
-
-                        # Try to get video stream info
-                        stream_info = chat.get_video_stream_url()
-                        if stream_info and isinstance(stream_info, dict):
-                            print("\n🎬 Ready for Real-Time Avatar Chat!")
-                            print(f"   📱 Session ID: {stream_info.get('session_id')}")
-                            print(f"   🔥 Status: {stream_info.get('status')}")
-                            print(f"   📖 SDK Guide: {stream_info.get('sdk_docs')}")
-                            print(f"   💡 Next Step: {stream_info.get('instructions')}")
-                        elif stream_info:
-                            print(f"🎥 Stream Info: {stream_info}")
+                    stream_info = chat.get_video_stream_url()
+                    if stream_info and isinstance(stream_info, dict):
+                        print("\n✅ Ready for browser avatar visualization!")
+                        print(f"   🌐 Mode: {stream_info.get('mode', 'browser_only')}")
+                        print(f"   🔗 API Server: {stream_info.get('api_server')}")
+                        print(f"   📖 Documentation: {stream_info.get('sdk_docs')}")
+                        print(f"   💡 Path: {stream_info.get('browser_path')}")
+                    elif stream_info:
+                        print(f"🎥 Stream Info: {stream_info}")
 
                 except Exception as e:
-                    print(f"❌ Error launching avatar: {e}")
+                    print(f"❌ Error launching avatar guidance: {e}")
 
             elif choice == "6":
                 # Check available settings
@@ -330,9 +286,12 @@ def main():
     except Exception as e:
         print(f"\n❌ Error occurred: {e}")
     finally:
-        # Clean up session
-        chat.end_session()
-        print("🧹 Resource cleanup completed")
+        # Clean up session only if it was created
+        if session_created:
+            chat.end_session()
+            print("🧹 Resource cleanup completed")
+        else:
+            print("🧹 No session to clean up")
 
     return 0
 
