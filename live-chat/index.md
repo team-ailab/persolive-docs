@@ -393,15 +393,6 @@ The script provides an interactive menu with the following options:
 4. **View chat history** - Display conversation history
 5. **Exit** - Clean up and terminate the session
 
-## Audio Requirements
-
-For voice features:
-- **File formats**: WAV (recommended), MP3
-- **Sample rate**: 16kHz or 44.1kHz
-- **Channels**: Mono or stereo
-- **Duration**: 0.5 to 30 seconds recommended
-- **File size**: Maximum 10MB
-
 ## Best Practices
 
 1. **Session Management**: Always call `end_session()` to clean up resources
