@@ -8,7 +8,7 @@ This system enables:
 - **Text Chat**: Type messages and receive AI responses
 - **Voice Chat**: Record voice messages and receive audio responses  
 - **Voice File Processing**: Upload audio files for speech recognition
-- **Settings Discovery**: Browse available TTS types and model styles
+- **Settings Discovery**: Browse available LLM, TTS types and model styles
 - **Browser Avatar Visualization**: Real-time avatar chat with WebRTC video streaming
 
 ## Prerequisites
@@ -20,7 +20,14 @@ This system enables:
 
 ## Installation
 
-1. **Install Python dependencies:**
+1. **Clone the repository:**
+   ```bash
+
+   # for browser avatar visualization
+   git clone https://github.com/est-perso-live/perso-live-sdk-sample.git
+   ```
+
+2. **Install Python dependencies:**
    ```bash
    pip install requests
    
@@ -28,7 +35,7 @@ This system enables:
    pip install pyaudio
    ```
 
-2. **Set up API credentials:**
+3. **Set up API credentials:**
    ```bash
    # Set environment variable
    export EST_LIVE_API_KEY="your-api-key-here"
@@ -61,29 +68,24 @@ The system supports two authentication methods:
    python main.py
    ```
 
-2. **The script will:**
-   - Show an interactive menu system
-   - Create sessions only when needed (lazy loading)
-   - Provide multiple chat modes and browser avatar guidance
-   - Clean up resources when finished
-
-3. **Available menu options:**
+2. **Available menu options:**
    - **Text Chat**: Type messages and receive text responses
    - **Voice Chat**: Record voice messages and receive audio responses
    - **Voice File Chat**: Upload audio files for processing
    - **Chat History**: View previous conversation messages
    - **Launch Avatar Visualization**: Get guidance for browser-based avatar chat
    - **Check Available Settings**: Browse available TTS types and model styles
+   - **Exit**: Clean up and terminate the session
 
 ### Configuration Options
 
 **Custom AI configuration:**
 ```bash
 # Use different LLM and TTS types
-python main.py --llm-type gpt-4 --tts-type "azuretts-ko-KR-InJoonNeural-sad"
+python main.py --llm-type gpt-35 --tts-type "yuri"
 
 # Use different avatar model style
-python main.py --model-style "indian_m_2_aaryan-side-white_jacket-natural"
+python main.py --model-style "yuri-front_natural"
 
 # Specify custom prompt and document
 python main.py --prompt "plp-12345" --document "pld-67890"
@@ -101,13 +103,9 @@ python main.py --list-settings tts_type
 python main.py --list-settings modelstyle
 ```
 
-**API server configuration:**
+**API server and API key configuration:**
 ```bash
-# Use custom API server
-python main.py --api-server "https://custom-api.example.com"
-
-# Use specific API key
-python main.py --api-key "your-api-key"
+python main.py --api-server "https://live-api.perso.ai" --api-key "your-api-key"
 ```
 
 **Capability selection:**
@@ -122,35 +120,52 @@ python main.py --capability LLM      # Chat without audio
 
 ### Complete Workflow Example
 
-1. **Step 1 - Start Basic Chat:**
+when you start the chat system, you can see the menu.
+
+```bash
+python main.py
+```
+
+1. **Option 1 - Start Basic Chat:**
    ```bash
-   # Start with default settings
-   python main.py
-   
-   # Choose option 1 (Text Chat) from the menu
+   # Choose option 1 from the menu
    # Type your message and receive AI responses
    ```
 
-2. **Step 2 - Try Voice Chat:**
+2. **Option 2 - Try Voice Chat:**
    ```bash
    # Ensure pyaudio is installed
    pip install pyaudio
    
-   # Start the chat system
-   python main.py
-   
-   # Choose option 2 (Voice Chat) from the menu
+   # Choose option 2 from the menu
    # Record your voice message and receive audio response
    ```
 
-3. **Step 3 - Browser Avatar Visualization:**
+3. **Option 3 - Try Voice File Chat:**
    ```bash
-   # Start the system
-   python main.py
-   
-   # Choose option 5 (Launch Avatar Visualization)
+   # Choose option 3 from the menu
+   # Upload an audio file and receive text response
+   ```
+
+4. **Option 4 - View Chat History:**
+   ```bash
+   # Choose option 4 from the menu
+   # View previous conversation messages
+   ```
+
+5. **Option 5 - Browser Avatar Visualization:**
+   ```bash
+   # Choose option 5 from the menu
    # Follow the guidance to open browser-based avatar chat
    ```
+
+6. **Option 6 - Check Available Settings:**
+   ```bash
+   # Choose option 6 from the menu
+   # Browse available LLM types, TTS types and model styles
+   ```
+
+7. **Option 7 - Exit:**
 
 ## API Reference
 
@@ -165,9 +180,9 @@ Creates a new chat session with the AI avatar.
 {
     "model_style": "string",        // Optional: Avatar model style name (e.g., "yuri-front_natural")
     "llm_type": "string",           // Optional: LLM type name (e.g., "gpt-35", "gpt-4")
-    "tts_type": "string",           // Optional: TTS type name (e.g., "yuri", "azuretts-ko-KR-InJoonNeural-sad")
+    "tts_type": "string",           // Optional: TTS type name (e.g., "yuri", "k_idol_m_3_yoon_hajin")
     "stt_type": "string",           // Optional: STT type name (e.g., "default")
-    "capability": ["string"],       // Optional: Array of capability names (e.g., ["LLM", "TTS", "STT", "STF_WEBRTC"])
+    "capability": ["string"],       // Optional: Array of capability names (e.g., ["LLM", "TTS", "STT"])
     "prompt": "string",             // Optional: Prompt ID (e.g., "plp-d432cb910983f1eed6511eba836ac14f")
     "background_image": "string",   // Optional: Background image ID
     "document": "string",           // Optional: Document ID (for AI context)
@@ -454,8 +469,6 @@ Available capability options:
 - `LLM` - Large Language Model for text conversations
 - `TTS` - Text-to-Speech for audio generation  
 - `STT` - Speech-to-Text for voice input
-- `STF_ONPREMISE` - Speech-to-Face on-premise processing
-- `STF_WEBRTC` - Speech-to-Face with WebRTC streaming
 
 ### Session Status Values
 - `CREATED` - Session created but not started
@@ -509,21 +522,28 @@ Popular avatar model styles include:
 
 For real-time avatar chat with video streaming, use the browser-based web SDK:
 
-**Prerequisites:**
-- Download the SDK sample from: https://github.com/est-perso-live/perso-live-sdk-sample
-- Clone or download the repository to your local machine
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/est-perso-live/perso-live-sdk-sample.git
+   ```
 
-1. **Access the web interface:**
+2. **Access the web interface:**
    - Path: `./perso-live-sdk-sample/js/src/index.html`
-   - Open in Chrome or Firefox browser
+   - Open in browser
 
-2. **Configure avatar settings in browser:**
-   - **Model style selection** - Choose from various avatar appearances and poses
-   - **Background customization** - Set custom background images for the avatar  
-   - **Position control** - Adjust avatar positioning with padding parameters
-   - **TTS/STT configuration** - Select voice and speech recognition types
+3. **Configure avatar settings in browser:**
+   - **API server** - Set the API server URL
+   - **API key** - Set the API key
+   - **LLM/TTS configuration** - Select LLM, TTS types
+   - **AI Human style selection** - Choose from various avatar appearances and poses
+   - **(Optional) Background** - Set custom background images for the avatar
+   - **(Optional) Prompt** - Set custom prompt for the avatar
+   - **(Optional) Intro Message** - Set custom intro message for the avatar
+   - **(Optional) Document** - Set custom document for the avatar
+   - **(Optional) Screen Orientation** - Choose from various screen orientations
+   - **(Optional) Position control** - Adjust avatar positioning with padding parameters
 
-3. **Browser creates independent session:**
+4. **Browser creates independent session:**
    - The web SDK creates its own session with avatar-specific parameters
    - No connection to Python sessions - completely independent
    - WebRTC video streaming works only in browser environment
@@ -546,25 +566,3 @@ Common error codes:
 - `413`: Payload Too Large - Audio file too big
 - `429`: Rate Limited - Too many requests
 - `500`: Internal Server Error - Server issue
-
-## Interactive Menu System
-
-The script provides an interactive menu with the following options:
-
-1. **Chat with text** - Type messages and receive text responses
-2. **Chat with voice (recording)** - Record voice messages (requires pyaudio)
-3. **Chat with voice file** - Upload and process audio files
-4. **View chat history** - Display conversation history
-5. **Launch avatar visualization** - Start real-time avatar experience in browser
-6. **Check available settings** - Browse available TTS types and model styles
-7. **Exit** - Clean up and terminate the session
-
-**Note:** "Launch avatar visualization" provides guidance for browser-based avatar chat using the web SDK, which creates its own independent sessions.
-
-## Best Practices
-
-1. **Session Management**: Always call `end_session()` to clean up resources
-2. **Error Handling**: Check session status before making API calls
-3. **Audio Quality**: Use good quality audio for better STT results
-4. **Rate Limiting**: Respect API rate limits for production use
-5. **Resource Cleanup**: Remove temporary audio files after processing
