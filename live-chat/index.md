@@ -91,6 +91,9 @@ python main.py --prompt "plp-12345" --document "pld-67890"
 
 **Settings discovery:**
 ```bash
+# Check available LLM types
+python main.py --list-settings llm_type
+
 # Check available TTS types
 python main.py --list-settings tts_type
 

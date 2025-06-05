@@ -25,6 +25,7 @@ Examples:
   python main.py --capability LLM TTS STT
   
   # Check available settings
+  python main.py --list-settings llm_type
   python main.py --list-settings tts_type
   python main.py --list-settings modelstyle
         """,
@@ -61,7 +62,9 @@ Examples:
     parser.add_argument("--agent", help="Agent identifier (optional)")
 
     # Settings Query
-    parser.add_argument("--list-settings", choices=["tts_type", "modelstyle"], help="List available settings and exit")
+    parser.add_argument(
+        "--list-settings", choices=["llm_type", "tts_type", "modelstyle"], help="List available settings and exit"
+    )
 
     return parser.parse_args()
 
