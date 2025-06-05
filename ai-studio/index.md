@@ -13,37 +13,54 @@ The AI Studio API enables you to create AI-generated video content using Text-to
 
 ## Prerequisites
 
-You need an API key issued by Perso.ai to use this service. Please contact our support team to obtain your API credentials.
-
-- API Key: Contact Perso.ai support team
-- Base URL: `https://live-api.perso.ai`
+- Python 3.8+
+- API key for the Perso.ai Live API service: Please contact our support team to obtain your API credentials.
 
 ## Installation
 
-**Python Version:** 3.8 or higher
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/team-ailab/persolive-docs.git
+   cd ai-studio
+   ```
 
-**Required packages:**
-```bash
-pip install requests
-```
+2. **Install Python dependencies:**
+    ```bash
+    # The script uses only the `requests` library for HTTP communication
+    pip install requests
+    ```
 
-The script uses only the `requests` library for HTTP communication and standard Python libraries (`json`, `os`, `time`, `urllib.parse`, `pathlib`).
+3. **Set up API credentials:**
+   ```bash
+   # Set environment variable
+   export EST_LIVE_API_KEY="your-api-key-here"
+   
+   # Or pass as command line argument
+   python main.py --api-key "your-api-key-here"
+   ```
 
 ## Authentication
 
-You must include your API key in the request headers as follows:
+The system supports various authentication methods:
 
-```python
-headers = {
-    "Content-Type": "application/json",
-    "PersoLive-APIKey": os.environ.get("EST_LIVE_API_KEY"),
-}
-```
+1. **Environment Variable (Recommended):**
+   ```bash
+   export EST_LIVE_API_KEY="your-api-key-here"
+   python main.py
+   ```
 
-**Environment Setup:**
-```bash
-export EST_LIVE_API_KEY="your-api-key-here"
-```
+2. **Command Line Argument:**
+   ```bash
+   python main.py --api-key "your-api-key-here"
+   ```
+
+3. **Authentication Header (When using requests library):**
+    ```python
+    headers = {
+        "Content-Type": "application/json",
+        "PersoLive-APIKey": os.environ.get("EST_LIVE_API_KEY"),
+    }
+    ```
 
 ## Quick Start
 
@@ -67,7 +84,7 @@ The `main.py` script demonstrates a complete AI video generation workflow:
 
 1. **Basic usage:**
    ```bash
-   python main.py --tts-text "Hello world" --tts-type "yuri" --stf-model-style "yuri-front_natural"
+   python main.py --tts-text "Hello world"
    ```
 
 2. **The script will:**
@@ -78,10 +95,7 @@ The `main.py` script demonstrates a complete AI video generation workflow:
 
 3. **Available options:**
    ```bash
-   # Basic generation
-   python main.py --tts-text "Hello world"
-   
-   # Multiple texts
+   # Multiple TTS texts
    python main.py --tts-text "Hello" "I am AI" "Nice to meet you"
    
    # Different TTS type
@@ -89,39 +103,16 @@ The `main.py` script demonstrates a complete AI video generation workflow:
    
    # Different model style
    python main.py --tts-text "Hello" --stf-model-style "indian_m_2_aaryan-side-white_jacket-natural"
+
+   # Different TTS type and model style
+   python main.py --tts-text "Hello world" --tts-type "yuri" --stf-model-style "yuri-front_natural"
    
    # Custom save directory
    python main.py --tts-text "Hello" --save-dir "./my-outputs"
    
    # Only TTS (skip video generation)
    python main.py --tts-text "Hello" --skip-stf
-   
-   # With custom API key
-   python main.py --tts-text "Hello" --api-key "your-key"
    ```
-
-### Complete Workflow Example
-
-1. **Step 1 - Check Available Options:**
-   ```bash
-   # Check available TTS types
-   python main.py --check-types tts_type
-   
-   # Check available model styles  
-   python main.py --check-types modelstyle
-   ```
-
-2. **Step 2 - Generate Content:**
-   ```bash
-   # Generate video with default settings
-   python main.py --tts-text "Hello, I am your AI assistant"
-   
-   # Generate with specific settings
-   python main.py --tts-text "안녕하세요" --tts-type "azuretts-ko-KR-InJoonNeural-sad" --stf-model-style "yuri-front_natural"
-   ```
-
-3. **Step 3 - Review Results:**
-   The script will output the local audio file path and the final video URL when completed.
 
 ## API Reference
 
@@ -300,16 +291,14 @@ Streams the STF task video in real-time. You can view the progress in real-time 
 - Video is streamed in real-time during generation
 - Returns an error if the task is in FAILED status or the file doesn't exist
 
-## Common TTS Types
-
+## TTS Types
 Popular TTS types include:
 - `yuri` - Default AI voice
 - `azuretts-ko-KR-InJoonNeural-sad` - Korean male voice (sad tone)
 - `azuretts-en-US-JennyNeural-cheerful` - English female voice (cheerful tone)
 - `azuretts-ja-JP-NanamiNeural-gentle` - Japanese female voice (gentle tone)
 
-## Common Model Styles
-
+## Model Styles
 Popular model styles include:
 - `yuri-front_natural` - Female avatar, front view, natural pose
 - `indian_m_2_aaryan-side-white_jacket-natural` - Male avatar, side view, business attire
@@ -353,7 +342,7 @@ if response.status_code >= 400:
     print(f"Error {response.status_code}: {response.text}")
 ```
 
-Common error codes:
+error codes:
 - `400`: Bad Request - Invalid parameters
 - `401`: Unauthorized - Invalid API key
 - `404`: Not Found - Resource doesn't exist

@@ -13,22 +13,25 @@ This system enables:
 
 ## Prerequisites
 
-- Python 3.7+
-- API key for the Perso.ai Live API service
-- Optional: `pyaudio` for voice recording features
-- Modern web browser (Chrome/Firefox) for avatar visualization
+You need an API key issued by Perso.ai to use this service. Please contact our support team to obtain your API credentials.
+
+- Python 3.8+
+- API key for the Perso.ai Live API service: Please contact our support team to obtain your API credentials.
+- Optional: `pyaudio` for voice recording features (for voice chat)
+- Modern web browser (Chrome/Firefox) for avatar visualization (for browser avatar visualization)
 
 ## Installation
 
 1. **Clone the repository:**
    ```bash
-
-   # for browser avatar visualization
-   git clone https://github.com/est-perso-live/perso-live-sdk-sample.git
+   # for live chat
+   git clone https://github.com/team-ailab/persolive-docs.git
+   cd live-chat
    ```
 
 2. **Install Python dependencies:**
    ```bash
+   # The script uses only the `requests` library for HTTP communication
    pip install requests
    
    # Optional: for voice recording features
@@ -46,7 +49,7 @@ This system enables:
 
 ## Authentication
 
-The system supports two authentication methods:
+The system supports various authentication methods:
 
 1. **Environment Variable (Recommended):**
    ```bash
@@ -58,6 +61,14 @@ The system supports two authentication methods:
    ```bash
    python main.py --api-key "your-api-key-here"
    ```
+
+3. **Authentication Header (When using requests library):**
+    ```python
+    headers = {
+        "Content-Type": "application/json",
+        "PersoLive-APIKey": os.environ.get("EST_LIVE_API_KEY"),
+    }
+    ```
 
 ## Quick Start
 
@@ -559,7 +570,7 @@ if response.status_code >= 400:
     print(f"Error {response.status_code}: {response.text}")
 ```
 
-Common error codes:
+error codes:
 - `400`: Bad Request - Invalid parameters or session state
 - `401`: Unauthorized - Invalid API key
 - `404`: Not Found - Session doesn't exist
