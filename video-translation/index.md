@@ -13,39 +13,45 @@ The Video Translation API enables you to automatically translate video content f
 
 ## Prerequisites
 
-You need an API key issued by Perso.ai to use this service. Please contact our support team to obtain your API credentials.
-
-- API Key: Contact Perso.ai support team
-- Base URL: `https://live-api.perso.ai`
+- Python 3.8+
+- API key for the Perso.ai Live API service: Please contact our support team to obtain your API credentials.
 
 ## Installation
 
-To run the example script (`main.py`), you need:
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/team-ailab/persolive-docs.git
+   cd video-translation
+   ```
 
-**Python Version:** 3.8 or higher
-
-**Required packages:**
-```bash
-pip install requests
-```
-
-The example script uses only the `requests` library for HTTP communication and standard Python libraries (`json`, `os`, `time`).
+2. **Install Python dependencies:**
+    ```bash
+    # The script uses only the `requests` library for HTTP communication
+    pip install requests
+    ```
 
 ## Authentication
 
-You must include your API key in the request headers as follows:
+The system supports various authentication methods:
 
-```python
-headers = {
-    "Content-Type": "application/json",
-    "PersoLive-APIKey": os.environ.get("EST_LIVE_API_KEY"),
-}
-```
+1. **Environment Variable (Recommended):**
+   ```bash
+   export EST_LIVE_API_KEY="your-api-key-here"
+   python main.py
+   ```
 
-**Environment Setup:**
-```bash
-export EST_LIVE_API_KEY="your-api-key-here"
-```
+2. **Command Line Argument:**
+   ```bash
+   python main.py --api-key "your-api-key-here"
+   ```
+
+3. **Authentication Header (When using requests library):**
+    ```python
+    headers = {
+        "Content-Type": "application/json",
+        "PersoLive-APIKey": os.environ.get("EST_LIVE_API_KEY"),
+    }
+    ```
 
 ## Quick Start
 
@@ -55,7 +61,7 @@ The `main.py` script demonstrates a complete basic video translation workflow:
 
 1. **Run the basic translation:**
    ```bash
-   python main.py --input-url "https://example.com/video.mp4" --source-lang ko --target-lang en
+   python main.py --input-url "https://samoonsikpoc.blob.core.windows.net/moonsikpoc/우영우_1_kor.mp4" --source-lang ko --target-lang en
    ```
 
 2. **The script will:**
@@ -75,8 +81,8 @@ The `main.py` script demonstrates a complete basic video translation workflow:
    # Without watermark
    python main.py --input-url "URL" --source-lang ko --target-lang en --no-watermark
    
-   # With custom API key
-   python main.py --input-url "URL" --source-lang ko --target-lang en --api-key "your-key"
+   # With different source and target languages (Spanish)
+   python main.py --input-url "URL" --source-lang ko --target-lang es
    ```
 
 ### Translation Modification Workflow
@@ -102,38 +108,24 @@ The `modify_translation.py` script allows you to edit specific translations and 
 
 4. **Available options:**
    ```bash
-   # Basic modification
-   python modify_translation.py --project-id "PROJECT_ID" --script-index 0 --text "New text"
-   
-   # With different target language
-   python modify_translation.py --project-id "PROJECT_ID" --script-index 0 --text "New text" --target-language es
+   # Basic modification (index 0)
+   python modify_translation.py --project-id "pvtp-uuid" --script-index 0 --text "New text"
+
+   # Basic modification (index 1)
+   python modify_translation.py --project-id "pvtp-uuid" --script-index 1 --text "New text"
+
+   # Basic modification (ID)
+   python modify_translation.py --project-id "pvtp-uuid" --script-id "pvts-uuid" --text "New text"
    
    # With lip-sync enabled
-   python modify_translation.py --project-id "PROJECT_ID" --script-index 0 --text "New text" --lipsync
+   python modify_translation.py --project-id "pvtp-uuid" --script-index 0 --text "New text" --lipsync
    
    # Without watermark
-   python modify_translation.py --project-id "PROJECT_ID" --script-index 0 --text "New text" --no-watermark
-   ```
-
-### Complete Workflow Example
-
-1. **Step 1 - Initial Translation:**
-   ```bash
-   python main.py --input-url "https://example.com/video.mp4" --source-lang ko --target-lang en
-   # Note the project ID from the output (e.g., pvtp-12345...)
-   ```
-
-2. **Step 2 - Review and Modify (Optional):**
-   ```bash
-   # Modify the first script (index 0)
-   python modify_translation.py --project-id "pvtp-12345..." --script-index 0 --text "Better translation"
+   python modify_translation.py --project-id "pvtp-uuid" --script-index 0 --text "New text" --no-watermark
    
-   # Modify the third script (index 2)  
-   python modify_translation.py --project-id "pvtp-12345..." --script-index 2 --text "Another improvement"
+   # With different target language
+   python modify_translation.py --project-id "pvtp-uuid" --script-index 0 --text "New text" --target-language ko
    ```
-
-3. **Step 3 - Final Export:**
-   The `modify_translation.py` script automatically creates a new export with your modifications. Each modification creates a separate export with all current translations included.
 
 ## API Reference
 
@@ -417,7 +409,7 @@ Regenerates audio for a script segment after modification. This step is **requir
     "start_ms": 1000,                   // Start time in milliseconds
     "end_ms": 5000,                     // End time in milliseconds
     "duration_ms": 4000,                // Duration in milliseconds
-    "text_original": "안녕하세요",      // Original text
+    "text_original": "안녕하세요",         // Original text
     "text_translated": "Hello there",   // Translated text
     "text_translated_original_match": false, // Whether translation matches original
     "semantic_match_rate": 0.95,        // Semantic similarity rate

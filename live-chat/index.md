@@ -38,15 +38,6 @@ You need an API key issued by Perso.ai to use this service. Please contact our s
    pip install pyaudio
    ```
 
-3. **Set up API credentials:**
-   ```bash
-   # Set environment variable
-   export EST_LIVE_API_KEY="your-api-key-here"
-   
-   # Or pass as command line argument
-   python main.py --api-key "your-api-key-here"
-   ```
-
 ## Authentication
 
 The system supports various authentication methods:

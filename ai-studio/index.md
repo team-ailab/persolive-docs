@@ -9,7 +9,7 @@ The AI Studio API enables you to create AI-generated video content using Text-to
 - **Multiple TTS types** including AI voices and Azure TTS services  
 - **Various model styles** for different avatar appearances and poses
 - **Audio format options** for different quality and compatibility needs
-- **Real-time task monitoring** throughout the generation process
+- **Real-time status tracking** throughout the generation process
 
 ## Prerequisites
 
@@ -29,15 +29,6 @@ The AI Studio API enables you to create AI-generated video content using Text-to
     # The script uses only the `requests` library for HTTP communication
     pip install requests
     ```
-
-3. **Set up API credentials:**
-   ```bash
-   # Set environment variable
-   export EST_LIVE_API_KEY="your-api-key-here"
-   
-   # Or pass as command line argument
-   python main.py --api-key "your-api-key-here"
-   ```
 
 ## Authentication
 
