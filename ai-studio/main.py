@@ -21,7 +21,7 @@ Examples:
   # Multiple TTS texts
   python main.py --tts-text "Hello" "I am AI" --tts-type "azuretts-ko-KR-InJoonNeural-sad"
   
-  # Check available types
+  # Check available types (optional)
   python main.py --check-types tts_type
   python main.py --check-types modelstyle
   
@@ -30,12 +30,14 @@ Examples:
         """,
     )
 
-    # Mode selection
-    mode_group = parser.add_mutually_exclusive_group(required=True)
-    mode_group.add_argument(
+    parser.add_argument(
         "--check-types", choices=["tts_type", "modelstyle"], help="Check available TTS types or model styles"
     )
-    mode_group.add_argument("--tts-text", nargs="+", help="Text(s) to convert to speech (can provide multiple texts)")
+
+    # TTS text input (default when check-types is not used)
+    parser.add_argument(
+        "--tts-text", nargs="+", default=["Hello"], help="Text(s) to convert to speech (can provide multiple texts)"
+    )
 
     # TTS/STF arguments (required when not checking types)
     parser.add_argument("--tts-type", default="yuri", help="TTS type to use (default: yuri)")
@@ -232,7 +234,7 @@ def main():
     print(f"🔗 Base URL: {base_url}")
     print("=" * 50)
 
-    # Check types mode
+    # Check types mode (optional)
     if args.check_types:
         check_types(base_url, headers, args.check_types)
         return 0
