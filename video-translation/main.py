@@ -31,11 +31,17 @@ Examples:
     # Optional arguments
     parser.add_argument("--input-name", help="Input file name (if not provided, will be extracted from URL)")
     parser.add_argument(
-        "--base-url", default="https://live-api.perso.ai", help="API base URL (default: https://live-api.perso.ai)"
+        "--base-url",
+        default="https://live-api.perso.ai",
+        help="API base URL (default: https://live-api.perso.ai)",
     )
     parser.add_argument("--lipsync", action="store_true", help="Enable lip-sync in the output video")
     parser.add_argument("--no-watermark", action="store_true", help="Disable watermark in the output video")
-    parser.add_argument("--api-key", help="API key (if not provided, will use EST_LIVE_API_KEY environment variable)")
+    parser.add_argument(
+        "--api-key",
+        help="API key (if not provided, will use EST_LIVE_API_KEY environment variable)",
+    )
+    parser.add_argument("--server-label", default="", help="Server label (default: empty - use any available server)")
 
     return parser.parse_args()
 
@@ -111,7 +117,7 @@ def main():
         {
             "export_type": "INITIAL_EXPORT",
             "priority": 0,
-            "server_label": "prod",
+            "server_label": args.server_label,
             "project": project_id,
             "target_language": target_language,
             "lipsync": lipsync,

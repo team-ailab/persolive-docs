@@ -24,19 +24,15 @@ Examples:
         required=True,
         help="Project ID from the initial translation",
     )
-
-    # Script identification (either script-id or script-index)
-    script_group = parser.add_mutually_exclusive_group(required=True)
-    script_group.add_argument(
+    parser.add_argument(
         "--script-id",
         help="Specific script ID to modify",
     )
-    script_group.add_argument(
+    parser.add_argument(
         "--script-index",
         type=int,
         help="Script index (0-based) to modify",
     )
-
     parser.add_argument(
         "--text",
         required=True,
@@ -173,13 +169,8 @@ def main():
             if not script_found:
                 print(f"❌ Script ID {script_id} not found in project.")
                 return 1
+        # Use script index
         else:
-            # Use script index
-            if args.script_index >= len(project_data["scripts"]):
-                print(
-                    f"❌ Script index {args.script_index} is out of range. Project has {len(project_data['scripts'])} scripts."
-                )
-                return 1
             script_id = project_data["scripts"][args.script_index]["projectscript_id"]
 
         print(f"📝 Modifying script {script_id}...")
