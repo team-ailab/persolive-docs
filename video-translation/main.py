@@ -126,6 +126,10 @@ def main():
     )
 
     response = requests.request("POST", url, headers=headers, data=payload, timeout=30)
+    if response.status_code >= 400:
+        print(f"❌ Error: {response.json()}")
+        return 1
+
     data = response.json()
 
     export_id = data["projectexport_id"]
