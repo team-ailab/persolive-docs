@@ -47,6 +47,11 @@ Examples:
     parser.add_argument("--lipsync", action="store_true", help="Enable lip-sync in the output video")
     parser.add_argument("--no-watermark", action="store_true", help="Disable watermark in the output video")
     parser.add_argument("--api-key", help="API key (if not provided, will use EST_LIVE_API_KEY environment variable)")
+    parser.add_argument(
+        "--server-label",
+        default="",
+        help="Server label (default: empty - use any available server)",
+    )
 
     return parser.parse_args()
 
@@ -92,14 +97,14 @@ def generate_audio(base_url, headers, script_id):
     return response.json()
 
 
-def create_proofread_export(base_url, headers, project_id, target_language, lipsync=False, watermark=True):
+def create_proofread_export(base_url, headers, project_id, target_language, lipsync=False, watermark=True, server_label=""):
     """Create a new export with modified translations"""
     url = f"{base_url}/api/video_translator/v2/export/"
 
     payload = json.dumps(
         {
             "export_type": "PROOFREAD_EXPORT",
-            "server_label": "prod",
+            "server_label": server_label,
             "priority": 0,
             "project": project_id,
             "target_language": target_language,
@@ -184,7 +189,7 @@ def main():
         print("🚀 Creating new export with modified translation...")
         watermark = not args.no_watermark
         export_result = create_proofread_export(
-            args.base_url, headers, args.project_id, args.target_language, args.lipsync, watermark
+            args.base_url, headers, args.project_id, args.target_language, args.lipsync, watermark, args.server_label
         )
 
         export_id = export_result["projectexport_id"]
