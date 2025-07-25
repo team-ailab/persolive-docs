@@ -126,6 +126,8 @@ class AvatarChat:
                                 sentence = data.get("sentence", "")
                                 print(sentence, end="", flush=True)
                                 ai_response += sentence
+                            else:
+                                print(f"❌ Error: {data.get('reason', 'Unknown error')}")
                         except json.JSONDecodeError:
                             continue
 
