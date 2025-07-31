@@ -41,12 +41,25 @@ Examples:
 
     # Optional arguments
     parser.add_argument(
-        "--base-url", default="https://live-api.perso.ai", help="API base URL (default: https://live-api.perso.ai)"
+        "--base-url",
+        default="https://live-api.perso.ai",
+        help="API base URL (default: https://live-api.perso.ai)",
     )
-    parser.add_argument("--target-language", default="en", help="Target language code (default: en)")
-    parser.add_argument("--lipsync", action="store_true", help="Enable lip-sync in the output video")
-    parser.add_argument("--no-watermark", action="store_true", help="Disable watermark in the output video")
-    parser.add_argument("--api-key", help="API key (if not provided, will use EST_LIVE_API_KEY environment variable)")
+    parser.add_argument(
+        "--target-language", default="en", help="Target language code (default: en)"
+    )
+    parser.add_argument(
+        "--lipsync", action="store_true", help="Enable lip-sync in the output video"
+    )
+    parser.add_argument(
+        "--no-watermark",
+        action="store_true",
+        help="Disable watermark in the output video",
+    )
+    parser.add_argument(
+        "--api-key",
+        help="API key (if not provided, will use EST_LIVE_API_KEY environment variable)",
+    )
     parser.add_argument(
         "--server-label",
         default="",
@@ -62,7 +75,9 @@ def get_project_scripts(base_url, headers, project_id):
     response = requests.get(url, headers=headers, timeout=30)
 
     if response.status_code >= 400:
-        raise Exception(f"Failed to get project details: {response.status_code} - {response.text}")
+        raise Exception(
+            f"Failed to get project details: {response.status_code} - {response.text}"
+        )
 
     return response.json()
 
@@ -80,7 +95,9 @@ def modify_script(base_url, headers, script_id, new_text):
     response = requests.patch(url, headers=headers, data=payload, timeout=30)
 
     if response.status_code >= 400:
-        raise Exception(f"Failed to modify script: {response.status_code} - {response.text}")
+        raise Exception(
+            f"Failed to modify script: {response.status_code} - {response.text}"
+        )
 
     return response.json()
 
@@ -92,12 +109,22 @@ def generate_audio(base_url, headers, script_id):
     response = requests.post(url, headers=headers, timeout=30)
 
     if response.status_code >= 400:
-        raise Exception(f"Failed to generate audio: {response.status_code} - {response.text}")
+        raise Exception(
+            f"Failed to generate audio: {response.status_code} - {response.text}"
+        )
 
     return response.json()
 
 
-def create_proofread_export(base_url, headers, project_id, target_language, lipsync=False, watermark=True, server_label=""):
+def create_proofread_export(
+    base_url,
+    headers,
+    project_id,
+    target_language,
+    lipsync=False,
+    watermark=True,
+    server_label="",
+):
     """Create a new export with modified translations"""
     url = f"{base_url}/api/video_translator/v2/export/"
 
@@ -116,7 +143,9 @@ def create_proofread_export(base_url, headers, project_id, target_language, lips
     response = requests.post(url, headers=headers, data=payload, timeout=30)
 
     if response.status_code >= 400:
-        raise Exception(f"Failed to create export: {response.status_code} - {response.text}")
+        raise Exception(
+            f"Failed to create export: {response.status_code} - {response.text}"
+        )
 
     return response.json()
 
@@ -130,15 +159,21 @@ def wait_for_export_completion(base_url, headers, export_id):
         response = requests.get(url, headers=headers, timeout=30)
 
         if response.status_code >= 400:
-            raise Exception(f"Failed to check export status: {response.status_code} - {response.text}")
+            raise Exception(
+                f"Failed to check export status: {response.status_code} - {response.text}"
+            )
 
         data = response.json()
-        print(f"⏳ Export {export_id} status: {data['status']} ({data.get('status_detail', 'N/A')})")
+        print(
+            f"⏳ Export {export_id} status: {data['status']} ({data.get('status_detail', 'N/A')})"
+        )
 
         if data["status"] == "COMPLETED":
             return data
         elif data["status"] == "FAILED":
-            raise Exception(f"Export failed: {data.get('status_detail', 'Unknown error')}")
+            raise Exception(
+                f"Export failed: {data.get('status_detail', 'Unknown error')}"
+            )
 
 
 def main():
@@ -170,7 +205,10 @@ def main():
         if args.script_id:
             script_id = args.script_id
             # Verify script exists
-            script_found = any(script["projectscript_id"] == script_id for script in project_data["scripts"])
+            script_found = any(
+                script["projectscript_id"] == script_id
+                for script in project_data["scripts"]
+            )
             if not script_found:
                 print(f"❌ Script ID {script_id} not found in project.")
                 return 1
@@ -189,7 +227,13 @@ def main():
         print("🚀 Creating new export with modified translation...")
         watermark = not args.no_watermark
         export_result = create_proofread_export(
-            args.base_url, headers, args.project_id, args.target_language, args.lipsync, watermark, args.server_label
+            args.base_url,
+            headers,
+            args.project_id,
+            args.target_language,
+            args.lipsync,
+            watermark,
+            args.server_label,
         )
 
         export_id = export_result["projectexport_id"]
@@ -199,8 +243,12 @@ def main():
         final_result = wait_for_export_completion(args.base_url, headers, export_id)
 
         print("🎉 Export completed successfully!")
-        print(f"🎥 Output video (with lip-sync): {final_result.get('video_output_video_with_lipsync', 'N/A')}")
-        print(f"🎥 Output video (without lip-sync): {final_result.get('video_output_video_without_lipsync', 'N/A')}")
+        print(
+            f"🎥 Output video (with lip-sync): {final_result.get('video_output_video_with_lipsync', 'N/A')}"
+        )
+        print(
+            f"🎥 Output video (without lip-sync): {final_result.get('video_output_video_without_lipsync', 'N/A')}"
+        )
 
         return 0
 

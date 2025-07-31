@@ -33,16 +33,31 @@ Examples:
 
     # API Configuration
     parser.add_argument(
-        "--api-server", default="https://live-api.perso.ai", help="API server URL (default: https://live-api.perso.ai)"
+        "--api-server",
+        default="https://live-api.perso.ai",
+        help="API server URL (default: https://live-api.perso.ai)",
     )
-    parser.add_argument("--api-key", help="API key (if not provided, will use EST_LIVE_API_KEY environment variable)")
+    parser.add_argument(
+        "--api-key",
+        help="API key (if not provided, will use EST_LIVE_API_KEY environment variable)",
+    )
 
     # AI Configuration
-    parser.add_argument("--llm-type", default="gpt-35", help="LLM type to use (default: gpt-35)")
-    parser.add_argument("--tts-type", default="yuri", help="TTS type to use (default: yuri)")
-    parser.add_argument("--stt-type", default="default", help="STT type to use (default: default)")
     parser.add_argument(
-        "--model-style", default="yuri-front_natural", help="Avatar model style (default: yuri-front_natural)"
+        "--llm-type",
+        default="gpt-35",
+        help="LLM type to use (default: gpt-4o-mini)",
+    )
+    parser.add_argument(
+        "--tts-type", default="yuri", help="TTS type to use (default: yuri)"
+    )
+    parser.add_argument(
+        "--stt-type", default="default", help="STT type to use (default: default)"
+    )
+    parser.add_argument(
+        "--model-style",
+        default="yoori-front-khaki_overalls-nodded_loop",
+        help="Avatar model style (default: yuri-front_natural)",
     )
 
     # Content Configuration
@@ -63,7 +78,9 @@ Examples:
 
     # Settings Query
     parser.add_argument(
-        "--list-settings", choices=["llm_type", "tts_type", "modelstyle"], help="List available settings and exit"
+        "--list-settings",
+        choices=["llm_type", "tts_type", "modelstyle"],
+        help="List available settings and exit",
     )
 
     return parser.parse_args()
@@ -103,7 +120,9 @@ def main():
 
             print(f"\n📋 Available {args.list_settings}:")
             for i, setting in enumerate(settings, 1):
-                print(f"{i:2d}. {setting['name']} - {setting.get('display_name', 'N/A')}")
+                print(
+                    f"{i:2d}. {setting['name']} - {setting.get('display_name', 'N/A')}"
+                )
 
             return 0
         except Exception as e:
@@ -179,7 +198,11 @@ def main():
                         ai_response = chat.chat_text(user_input)
 
                         # Ask if user wants TTS
-                        tts_choice = input("\n🔊 Would you like to hear it as speech? (y/N): ").strip().lower()
+                        tts_choice = (
+                            input("\n🔊 Would you like to hear it as speech? (y/N): ")
+                            .strip()
+                            .lower()
+                        )
                         if tts_choice == "y":
                             tts_file = f"ai_response_{int(time.time())}.wav"
                             chat.generate_speech(ai_response, tts_file)
@@ -188,7 +211,9 @@ def main():
             elif choice == "2":
                 # Voice chat
                 if not AUDIO_AVAILABLE:
-                    print("❌ pyaudio is not installed, voice features are unavailable.")
+                    print(
+                        "❌ pyaudio is not installed, voice features are unavailable."
+                    )
                     print("   Install: pip install pyaudio")
                     continue
 
@@ -217,7 +242,9 @@ def main():
                 except Exception as e:
                     print(f"❌ Error: {e}")
                     if "Session has ended" in str(e):
-                        print("💡 Solution: Restart the program to create a new session.")
+                        print(
+                            "💡 Solution: Restart the program to create a new session."
+                        )
 
             elif choice == "4":
                 # Chat history
@@ -236,8 +263,12 @@ def main():
             elif choice == "5":
                 # Launch avatar visualization (browser-only mode - no Python session needed)
                 print("\n🎭 Browser Avatar Visualization (Independent Mode)")
-                print("ℹ️  This mode uses browser-only WebRTC - no Python session required")
-                print("🔄 Browser creates its own session - independent from any Python session")
+                print(
+                    "ℹ️  This mode uses browser-only WebRTC - no Python session required"
+                )
+                print(
+                    "🔄 Browser creates its own session - independent from any Python session"
+                )
 
                 try:
                     stream_info = chat.get_video_stream_url()
@@ -265,12 +296,16 @@ def main():
                         settings = chat.get_available_settings("tts_type")
                         print("\n🔊 Available TTS Types:")
                         for i, setting in enumerate(settings, 1):
-                            print(f"{i:2d}. {setting['name']} - {setting.get('display_name', 'N/A')}")
+                            print(
+                                f"{i:2d}. {setting['name']} - {setting.get('display_name', 'N/A')}"
+                            )
                     elif setting_choice == "2":
                         settings = chat.get_available_settings("modelstyle")
                         print("\n👤 Available Model Styles:")
                         for i, setting in enumerate(settings, 1):
-                            print(f"{i:2d}. {setting['name']} - {setting.get('display_name', 'N/A')}")
+                            print(
+                                f"{i:2d}. {setting['name']} - {setting.get('display_name', 'N/A')}"
+                            )
                     else:
                         print("❌ Invalid choice.")
                 except Exception as e:

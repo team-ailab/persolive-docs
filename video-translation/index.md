@@ -61,7 +61,7 @@ The `main.py` script demonstrates a complete basic video translation workflow:
 
 1. **Run the basic translation:**
    ```bash
-   python main.py --input-url "https://samoonsikpoc.blob.core.windows.net/moonsikpoc/우영우_1_kor.mp4" --source-lang ko --target-lang en
+   python main.py --input-file-url "https://samoonsikpoc.blob.core.windows.net/moonsikpoc/우영우_1_kor.mp4" --source-lang ko --target-lang en
    ```
 
 2. **The script will:**
@@ -73,16 +73,16 @@ The `main.py` script demonstrates a complete basic video translation workflow:
 3. **Available options:**
    ```bash
    # Basic translation
-   python main.py --input-url "URL" --source-lang ko --target-lang en
+   python main.py --input-file-url "URL" --source-lang ko --target-lang en
    
    # With lip-sync enabled
-   python main.py --input-url "URL" --source-lang ko --target-lang en --lipsync
+   python main.py --input-file-url "URL" --source-lang ko --target-lang en --lipsync
    
    # Without watermark
-   python main.py --input-url "URL" --source-lang ko --target-lang en --no-watermark
+   python main.py --input-file-url "URL" --source-lang ko --target-lang en --no-watermark
    
    # With different source and target languages (Spanish)
-   python main.py --input-url "URL" --source-lang ko --target-lang es
+   python main.py --input-file-url "URL" --source-lang ko --target-lang es
    ```
 
 ### Translation Modification Workflow

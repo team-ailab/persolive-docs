@@ -31,35 +31,55 @@ Examples:
     )
 
     parser.add_argument(
-        "--check-types", choices=["tts_type", "modelstyle"], help="Check available TTS types or model styles"
+        "--check-types",
+        choices=["tts_type", "modelstyle"],
+        help="Check available TTS types or model styles",
     )
 
     # TTS text input (default when check-types is not used)
     parser.add_argument(
-        "--tts-text", nargs="+", default=["Hello"], help="Text(s) to convert to speech (can provide multiple texts)"
+        "--tts-text",
+        nargs="+",
+        default=["hello"],
+        help="Text(s) to convert to speech (can provide multiple texts)",
     )
 
     # TTS/STF arguments (required when not checking types)
-    parser.add_argument("--tts-type", default="yuri", help="TTS type to use (default: yuri)")
     parser.add_argument(
-        "--stf-model-style", default="yuri-front_natural", help="STF model style (default: yuri-front_natural)"
+        "--tts-type",
+        default="yuri",
+        help="TTS type to use (default: yuri)",
+    )
+    parser.add_argument(
+        "--stf-model-style",
+        default="yoori-front-khaki_overalls-nodded_loop",
+        help="STF model style (default: yuri-front_natural)",
     )
     parser.add_argument(
         "--tts-audio-format",
         default="wav_16bit_32000hz_mono",
         help="TTS audio format (default: wav_16bit_32000hz_mono)",
     )
-
-    # Optional arguments
     parser.add_argument(
-        "--base-url", default="https://live-api.perso.ai", help="API base URL (default: https://live-api.perso.ai)"
+        "--base-url",
+        default="https://live-api.perso.ai",
+        help="API base URL (default: https://live-api.perso.ai)",
     )
     parser.add_argument("--agent", default="1", help="Agent ID (default: 1)")
     parser.add_argument(
-        "--save-dir", default="user-uploads", help="Directory to save downloaded files (default: user-uploads)"
+        "--save-dir",
+        default="user-uploads",
+        help="Directory to save downloaded files (default: user-uploads)",
     )
-    parser.add_argument("--api-key", help="API key (if not provided, will use EST_LIVE_API_KEY environment variable)")
-    parser.add_argument("--skip-stf", action="store_true", help="Skip STF (Speech-to-Face) generation, only do TTS")
+    parser.add_argument(
+        "--api-key",
+        help="API key (if not provided, will use EST_LIVE_API_KEY environment variable)",
+    )
+    parser.add_argument(
+        "--skip-stf",
+        action="store_true",
+        help="Skip STF (Speech-to-Face) generation, only do TTS",
+    )
 
     return parser.parse_args()
 
@@ -146,7 +166,9 @@ def tts_task(
 
     while True:
         time.sleep(5)
-        response = requests.get(url + f"{data['task_id']}/", headers=headers, timeout=30)
+        response = requests.get(
+            url + f"{data['task_id']}/", headers=headers, timeout=30
+        )
         data = response.json()
         print(f"⏳ TTS task status: {data['status']}")
 
@@ -161,7 +183,11 @@ def tts_task(
 
 
 def stf_task(
-    base_url: str, headers: dict, stf_input_audio: str, stf_model_style: str = "yuri-front_natural", agent: str = "1"
+    base_url: str,
+    headers: dict,
+    stf_input_audio: str,
+    stf_model_style: str = "yuri-front_natural",
+    agent: str = "1",
 ):
     """Perform STF (Speech To Face) task."""
     print("🎭 Starting STF task...")
@@ -181,8 +207,12 @@ def stf_task(
 
     try:
         with open(stf_input_audio, "rb") as f:
-            files = {"stf_input_audio": (os.path.basename(stf_input_audio), f, "audio/wav")}
-            response = requests.post(url, headers=upload_headers, data=data, files=files, timeout=30)
+            files = {
+                "stf_input_audio": (os.path.basename(stf_input_audio), f, "audio/wav")
+            }
+            response = requests.post(
+                url, headers=upload_headers, data=data, files=files, timeout=30
+            )
     except FileNotFoundError:
         print(f"❌ Audio file not found: {stf_input_audio}")
         return None
@@ -197,7 +227,9 @@ def stf_task(
 
     while True:
         time.sleep(5)
-        response = requests.get(url + f"{data['task_id']}/", headers=headers, timeout=30)
+        response = requests.get(
+            url + f"{data['task_id']}/", headers=headers, timeout=30
+        )
         data = response.json()
         print(f"⏳ STF task status: {data['status']}")
 
