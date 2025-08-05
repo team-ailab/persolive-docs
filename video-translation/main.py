@@ -88,6 +88,10 @@ Examples:
         "--experiments",
         help="Experiments",
     )
+    parser.add_argument(
+        "--input-file-source-language-subtitle",
+        help="Input file source language subtitle",
+    )
     return parser.parse_args()
 
 
@@ -153,6 +157,9 @@ def main():
     }
     if args.experiments:
         payload["experiments"] = args.experiments
+
+    if args.input_file_source_language_subtitle:
+        payload["input_file_source_language_subtitle"] = args.input_file_source_language_subtitle
 
     payload = json.dumps(payload, ensure_ascii=False)
 
