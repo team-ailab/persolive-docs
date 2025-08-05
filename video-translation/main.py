@@ -81,7 +81,7 @@ Examples:
     )
     parser.add_argument(
         "--input-number-of-speakers",
-        default=2,
+        default=1,
         help="Input number of speakers",
     )
     parser.add_argument(
