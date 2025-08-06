@@ -138,8 +138,12 @@ def main():
     print(f"🕒 Input file video duration: {args.input_file_video_duration_sec} seconds")
     print(f"👂 Input number of speakers: {args.input_number_of_speakers}")
     print(f"🧪 Experiments: {args.experiments}")
-    print(f"🕒 Video pipeline timeout lower bound: {args.video_pipeline_timeout_lower_bound_sec} seconds")
-    print(f"🔗 Input file source language subtitle URL: {args.input_file_source_language_subtitle_url}")
+    print(
+        f"🕒 Video pipeline timeout lower bound: {args.video_pipeline_timeout_lower_bound_sec} seconds"
+    )
+    print(
+        f"🔗 Input file source language subtitle URL: {args.input_file_source_language_subtitle_url}"
+    )
     print("=" * 50)
 
     ########## Create Project
@@ -154,12 +158,12 @@ def main():
         "input_number_of_speakers": args.input_number_of_speakers,
         "experiments": args.experiments,
         "video_pipeline_timeout_lower_bound_sec": args.video_pipeline_timeout_lower_bound_sec,
-        "input_file_source_language_subtitle_url": args.input_file_source_language_subtitle_url
+        "input_file_source_language_subtitle_url": args.input_file_source_language_subtitle_url,
     }
 
     payload = json.dumps(payload, ensure_ascii=False)
 
-    response = requests.request("POST", url, headers=headers, data=payload, timeout=30)
+    response = requests.request("POST", url, headers=headers, data=payload, timeout=60)
     if response.status_code >= 400:
         print(f"❌ Error: {response.json()}")
         return 1
