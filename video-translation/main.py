@@ -136,11 +136,10 @@ def main():
     print(f"💋 Lip-sync: {'Enabled' if args.lipsync else 'Disabled'}")
     print(f"🏷️  Watermark: {'Enabled' if watermark else 'Disabled'}")
     print(f"🕒 Input file video duration: {args.input_file_video_duration_sec} seconds")
-    print(
-        f"🕒 Video pipeline timeout lower bound: {args.video_pipeline_timeout_lower_bound_sec} seconds"
-    )
     print(f"👂 Input number of speakers: {args.input_number_of_speakers}")
     print(f"🧪 Experiments: {args.experiments}")
+    print(f"🕒 Video pipeline timeout lower bound: {args.video_pipeline_timeout_lower_bound_sec} seconds")
+    print(f"🔗 Input file source language subtitle URL: {args.input_file_source_language_subtitle_url}")
     print("=" * 50)
 
     ########## Create Project
@@ -152,14 +151,11 @@ def main():
         "input_file_url": args.input_file_url,
         "source_language": args.source_language,
         "input_file_video_duration_sec": args.input_file_video_duration_sec,
-        "video_pipeline_timeout_lower_bound_sec": args.video_pipeline_timeout_lower_bound_sec,
         "input_number_of_speakers": args.input_number_of_speakers,
+        "experiments": args.experiments,
+        "video_pipeline_timeout_lower_bound_sec": args.video_pipeline_timeout_lower_bound_sec,
+        "input_file_source_language_subtitle_url": args.input_file_source_language_subtitle_url
     }
-    if args.experiments:
-        payload["experiments"] = args.experiments
-
-    if args.input_file_source_language_subtitle:
-        payload["input_file_source_language_subtitle"] = args.input_file_source_language_subtitle
 
     payload = json.dumps(payload, ensure_ascii=False)
 
@@ -210,7 +206,7 @@ def main():
 
     while True:
         time.sleep(5)
-        request = requests.get(url + f"{export_id}/", headers=headers, timeout=30)
+        request = requests.get(url + f"{export_id}/", headers=headers, timeout=120)
 
         data = request.json()
 
