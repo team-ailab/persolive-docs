@@ -49,7 +49,12 @@ class AvatarChat:
         """Create session for text and voice chat"""
         print("📝 Creating session...")
 
-        data: dict = {"llm_type": llm_type, "tts_type": tts_type, "model_style": model_style, "prompt": prompt}
+        data: dict = {
+            "llm_type": llm_type,
+            "tts_type": tts_type,
+            "model_style": model_style,
+            "prompt": prompt,
+        }
 
         if document:
             data["document"] = document
@@ -63,7 +68,10 @@ class AvatarChat:
 
         response = requests.post(
             f"{self.api_server}/api/v1/session/",
-            headers={"PersoLive-APIKey": self.api_key, "Content-Type": "application/json"},
+            headers={
+                "PersoLive-APIKey": self.api_key,
+                "Content-Type": "application/json",
+            },
             json=data,
         )
 
@@ -73,7 +81,9 @@ class AvatarChat:
             print(f"✅ Session created: {self.session_id}")
             return self.session_id
         else:
-            raise Exception(f"Session creation failed: {response.status_code} - {response.text}")
+            raise Exception(
+                f"Session creation failed: {response.status_code} - {response.text}"
+            )
 
     def start_session(self):
         """Start session"""
@@ -92,7 +102,9 @@ class AvatarChat:
         if response.status_code == 201:
             print("✅ Session has been started.")
         else:
-            raise Exception(f"Session start failed: {response.status_code} - {response.text}")
+            raise Exception(
+                f"Session start failed: {response.status_code} - {response.text}"
+            )
 
     def chat_text(self, message: str) -> str:
         """Chat with AI using text"""
@@ -127,7 +139,9 @@ class AvatarChat:
                                 print(sentence, end="", flush=True)
                                 ai_response += sentence
                             else:
-                                print(f"❌ Error: {data.get('reason', 'Unknown error')}")
+                                print(
+                                    f"❌ Error: {data.get('reason', 'Unknown error')}"
+                                )
                         except json.JSONDecodeError:
                             continue
 
@@ -137,7 +151,9 @@ class AvatarChat:
             self.chat_history.append({"role": "AI", "content": ai_response})
             return ai_response
         else:
-            raise Exception(f"LLM request failed: {response.status_code} - {response.text}")
+            raise Exception(
+                f"LLM request failed: {response.status_code} - {response.text}"
+            )
 
     def generate_speech(self, text: str, save_path: Optional[str] = None) -> bytes:
         """Convert text to speech"""
@@ -163,7 +179,9 @@ class AvatarChat:
 
             return audio_data
         else:
-            raise Exception(f"TTS request failed: {response.status_code} - {response.text}")
+            raise Exception(
+                f"TTS request failed: {response.status_code} - {response.text}"
+            )
 
     def recognize_speech(self, audio_file_path: str) -> str:
         """Convert audio file to text"""
@@ -175,7 +193,9 @@ class AvatarChat:
             status = self.get_session_status()
             print(f"📊 Current session status: {status}")
             if status == "TERMINATED":
-                raise Exception("Session has been terminated. Please start a new session.")
+                raise Exception(
+                    "Session has been terminated. Please start a new session."
+                )
             elif status != "IN_PROGRESS":
                 print(f"⚠️  Session is not in IN_PROGRESS state. Current: {status}")
         except Exception as e:
@@ -191,7 +211,9 @@ class AvatarChat:
                 sample_rate = wf.getframerate()
                 channels = wf.getnchannels()
                 duration = frames / float(sample_rate)
-                print(f"🎵 Audio info: {duration:.2f}s, {sample_rate}Hz, {channels}ch, {frames}frames")
+                print(
+                    f"🎵 Audio info: {duration:.2f}s, {sample_rate}Hz, {channels}ch, {frames}frames"
+                )
 
                 if duration < 0.5:
                     print("⚠️  Audio is too short. (Less than 0.5 seconds)")
@@ -234,7 +256,9 @@ class AvatarChat:
             print(f"✅ Recognized text: {recognized_text}")
             return recognized_text
         else:
-            raise Exception(f"STT request failed: {response.status_code} - {response.text}")
+            raise Exception(
+                f"STT request failed: {response.status_code} - {response.text}"
+            )
 
     def start_recording(self):
         """Start real-time voice recording"""
@@ -253,7 +277,11 @@ class AvatarChat:
 
         audio = pyaudio.PyAudio()
         stream = audio.open(
-            format=self.audio_format, channels=self.channels, rate=self.rate, input=True, frames_per_buffer=self.chunk
+            format=self.audio_format,
+            channels=self.channels,
+            rate=self.rate,
+            input=True,
+            frames_per_buffer=self.chunk,
         )
 
         def record():
@@ -356,7 +384,9 @@ class AvatarChat:
         elif system == "Linux":
             os.system(f"aplay {audio_file}")
         elif system == "Windows":
-            os.system(f"powershell -c \"(New-Object Media.SoundPlayer '{audio_file}').PlaySync()\"")
+            os.system(
+                f"powershell -c \"(New-Object Media.SoundPlayer '{audio_file}').PlaySync()\""
+            )
         else:
             print("⚠️  Audio playback is not supported on this OS.")
 
@@ -395,7 +425,9 @@ class AvatarChat:
             result = response.json()
             return result.get("status", "UNKNOWN")
         else:
-            raise Exception(f"Session status query failed: {response.status_code} - {response.text}")
+            raise Exception(
+                f"Session status query failed: {response.status_code} - {response.text}"
+            )
 
     def wait_for_session_ready(self, timeout: int = 30):
         """Wait until session becomes IN_PROGRESS state"""
@@ -450,7 +482,9 @@ class AvatarChat:
             print(f"✅ Retrieved {len(result)} {setting_type} options")
             return result
         else:
-            raise Exception(f"Failed to get {setting_type}: {response.status_code} - {response.text}")
+            raise Exception(
+                f"Failed to get {setting_type}: {response.status_code} - {response.text}"
+            )
 
     def get_video_stream_url(self) -> Optional[str]:
         """Get browser avatar visualization information (no Python session required)"""
@@ -467,7 +501,9 @@ class AvatarChat:
         print("   4. Click START to create new browser session")
         print("   5. Enjoy real-time avatar chat with WebRTC video!")
         print()
-        print("📖 SDK Documentation: https://est-perso-live.github.io/perso-live-sdk/js/")
+        print(
+            "📖 SDK Documentation: https://est-perso-live.github.io/perso-live-sdk/js/"
+        )
 
         return {
             "mode": "browser_only",
