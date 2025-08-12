@@ -75,11 +75,6 @@ Examples:
         help="Server label (default: empty - use any available server)",
     )
     parser.add_argument(
-        "--video-pipeline-timeout-lower-bound-sec",
-        default=0,
-        help="Video pipeline timeout lower bound in seconds",
-    )
-    parser.add_argument(
         "--input-number-of-speakers",
         default=1,
         help="Input number of speakers",
@@ -139,9 +134,6 @@ def main():
     print(f"👂 Input number of speakers: {args.input_number_of_speakers}")
     print(f"🧪 Experiments: {args.experiments}")
     print(
-        f"🕒 Video pipeline timeout lower bound: {args.video_pipeline_timeout_lower_bound_sec} seconds"
-    )
-    print(
         f"🔗 Input file source language subtitle URL: {args.input_file_source_language_subtitle_url}"
     )
     print("=" * 50)
@@ -157,7 +149,6 @@ def main():
         "input_file_video_duration_sec": args.input_file_video_duration_sec,
         "input_number_of_speakers": args.input_number_of_speakers,
         "experiments": args.experiments,
-        "video_pipeline_timeout_lower_bound_sec": args.video_pipeline_timeout_lower_bound_sec,
         "input_file_source_language_subtitle_url": args.input_file_source_language_subtitle_url,
     }
 
