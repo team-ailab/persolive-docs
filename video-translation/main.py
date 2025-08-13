@@ -154,7 +154,7 @@ def main():
 
     payload = json.dumps(payload, ensure_ascii=False)
 
-    response = requests.request("POST", url, headers=headers, data=payload, timeout=60)
+    response = requests.request("POST", url, headers=headers, data=payload, timeout=30)
     if response.status_code >= 400:
         print(f"❌ Error: {response.json()}")
         return 1
