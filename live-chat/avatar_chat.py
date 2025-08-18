@@ -119,7 +119,7 @@ class AvatarChat:
         response = requests.post(
             f"{self.api_server}/api/v1/session/{self.session_id}/llm/",
             headers={"Content-Type": "application/json"},
-            json={"message": message, "clear_history": False},
+            json={"message": message, "tools": [],  "clear_history": False},
             stream=True,
         )
 
