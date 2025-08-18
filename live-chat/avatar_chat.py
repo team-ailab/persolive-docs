@@ -26,6 +26,7 @@ class AvatarChat:
         self.session_id: Optional[str] = None
         self.chat_history: list[dict[str, str]] = []
         self.capability: list[str] = []  # Store capability information
+        self.tools: list[str] = []
 
         # Audio settings
         self.audio_format = pyaudio.paInt16 if AUDIO_AVAILABLE else None
@@ -45,6 +46,8 @@ class AvatarChat:
         capability: Optional[list[str]] = None,
         stt_type: Optional[str] = None,
         agent: Optional[str] = None,
+        mcp_servers: Optional[str] = None,
+        tools: Optional[list[str]] = None,
     ) -> Optional[str]:
         """Create session for text and voice chat"""
         print("📝 Creating session...")
@@ -65,6 +68,10 @@ class AvatarChat:
             data["stt_type"] = stt_type
         if agent:
             data["agent"] = agent
+        if mcp_servers:
+            data["mcp_servers"] = mcp_servers
+        if tools:
+            self.tools = tools  # Store for later use
 
         response = requests.post(
             f"{self.api_server}/api/v1/session/",
@@ -119,7 +126,7 @@ class AvatarChat:
         response = requests.post(
             f"{self.api_server}/api/v1/session/{self.session_id}/llm/",
             headers={"Content-Type": "application/json"},
-            json={"message": message, "tools": [],  "clear_history": False},
+            json={"message": message, "tools": self.tools, "clear_history": False},
             stream=True,
         )
 

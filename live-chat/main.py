@@ -75,6 +75,15 @@ Examples:
         help="Capabilities to enable for Python session (default: LLM TTS STT)",
     )
     parser.add_argument("--agent", help="Agent identifier (optional)")
+    parser.add_argument(
+        "--mcp-servers",
+        help="MCP server ids",
+    )
+    parser.add_argument(
+        "--tools",
+        default=[],
+        help="Tools for MCP",
+    )
 
     # Settings Query
     parser.add_argument(
@@ -140,6 +149,8 @@ def main():
     DOCUMENT = args.document
     CAPABILITY = args.capability
     AGENT = args.agent
+    MCP_SERVERS = args.mcp_servers
+    TOOLS = args.tools
 
     if not API_KEY:
         print(
@@ -182,6 +193,8 @@ def main():
                     document=DOCUMENT,
                     capability=CAPABILITY,
                     agent=AGENT,
+                    mcp_servers=MCP_SERVERS,
+                    tools=TOOLS,
                 )
                 chat.start_session()
                 session_created = True
