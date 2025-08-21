@@ -326,7 +326,6 @@ def photo_avatar_task(
         if data["status"] == "COMPLETED":
             video_url = data["photoavatar_output_video"]
             print("✅ Photo Avatar task completed!")
-            print(f"🎥 Output video: {video_url}")
             return video_url
         elif data["status"] == "FAILED":
             print(

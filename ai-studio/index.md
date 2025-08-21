@@ -118,17 +118,11 @@ The Photo Avatar feature allows you to create videos using your own photos:
 
 1. **Basic Photo Avatar usage:**
    ```bash
-   # Uses default photo and TTS text
-   python main.py --tts-text "Hello, this is my avatar"
-   ```
-
-2. **Custom photo usage:**
-   ```bash
    # Using local image file
-   python main.py --tts-text "Hello world" --photo-avatar-input-image "./my-photo.jpg"
+   python main.py --tts-text "Hello world" --skip-stf --photo-avatar-input-image "./my-photo.jpg"
    
    # Using image URL
-   python main.py --tts-text "Hello world" --photo-avatar-input-image "https://example.com/photo.jpg"
+   python main.py --tts-text "Hello world" --skip-stf --photo-avatar-input-image "https://example.com/photo.jpg"
    ```
 
 3. **The Photo Avatar workflow will:**
