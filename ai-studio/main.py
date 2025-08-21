@@ -76,6 +76,10 @@ Examples:
         help="API key (if not provided, will use EST_LIVE_API_KEY environment variable)",
     )
     parser.add_argument(
+        "--webhook_url",
+        help="Webhook URL",
+    )
+    parser.add_argument(
         "--skip-stf",
         action="store_true",
         help="Skip STF (Speech-to-Face) generation",
@@ -145,6 +149,7 @@ def tts_task(
     tts_type: str = "yuri",
     tts_audio_format: str = "wav_16bit_32000hz_mono",
     agent: str = "1",
+    webhook_url: str = None,
 ):
     """Perform TTS task."""
     print("🎵 Starting TTS task...")
@@ -160,7 +165,9 @@ def tts_task(
             "tts_type": tts_type,
             "tts_audio_format": tts_audio_format,
             "tts_text": tts_text,
-        }
+            "webhook_url": webhook_url,
+        },
+        ensure_ascii=False,
     )
     response = requests.post(url, headers=headers, data=payload, timeout=30)
     data = response.json()
@@ -194,6 +201,7 @@ def stf_task(
     stf_input_audio: str,
     stf_model_style: str = "yuri-front_natural",
     agent: str = "1",
+    webhook_url: str = None,
 ):
     """Perform STF (Speech To Face) task."""
     print("🎭 Starting STF task...")
@@ -209,6 +217,7 @@ def stf_task(
     data = {
         "agent": agent,
         "stf_model_style": stf_model_style,
+        "webhook_url": webhook_url,
     }
 
     try:
@@ -255,6 +264,7 @@ def photo_avatar_task(
     photo_avatar_input_image: str,
     photo_avatar_input_audio: str,
     agent: str = "1",
+    webhook_url: str = None,
 ):
     """Perform Photo Avatar task."""
     print("🎭 Starting Photo Avatar task...")
@@ -269,6 +279,7 @@ def photo_avatar_task(
 
     data = {
         "agent": agent,
+        "webhook_url": webhook_url,
     }
     files = {}
 
@@ -375,6 +386,7 @@ def main():
         tts_type=args.tts_type,
         tts_audio_format=args.tts_audio_format,
         agent=args.agent,
+        webhook_url=args.webhook_url,
     )
 
     local_audio_path = download_file(audio_url, args.save_dir)
@@ -396,6 +408,7 @@ def main():
             stf_input_audio=local_audio_path,
             stf_model_style=args.stf_model_style,
             agent=args.agent,
+            webhook_url=args.webhook_url,
         )
 
         if not video_url:
@@ -413,6 +426,7 @@ def main():
             photo_avatar_input_image=args.photo_avatar_input_image,
             photo_avatar_input_audio=audio_url,
             agent=args.agent,
+            webhook_url=args.webhook_url,
         )
 
         if not video_url:
