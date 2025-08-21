@@ -78,9 +78,18 @@ Examples:
     parser.add_argument(
         "--skip-stf",
         action="store_true",
-        help="Skip STF (Speech-to-Face) generation, only do TTS",
+        help="Skip STF (Speech-to-Face) generation",
     )
-
+    parser.add_argument(
+        "--skip-photo-avatar",
+        action="store_true",
+        help="Skip Photo Avatar generation",
+    )
+    parser.add_argument(
+        "--photo-avatar-input-image",
+        default="https://sa01persosaasdev.blob.core.windows.net/user-uploads/perso-studio-task/test/photo_avartar_sonic.jpg?sp=r&st=2025-08-21T01:24:51Z&se=2025-11-21T09:39:51Z&spr=https&sv=2024-11-04&sr=b&sig=mUuh%2B%2FKCwmrlBbszVbdI4pywOFZkpb%2BZ%2B3t3Zt5Q%2Fso%3D",
+        help="Input image file path or URL for Photo Avatar",
+    )
     return parser.parse_args()
 
 
@@ -136,7 +145,6 @@ def tts_task(
     tts_type: str = "yuri",
     tts_audio_format: str = "wav_16bit_32000hz_mono",
     agent: str = "1",
-    save_dir: str = "user-uploads",
 ):
     """Perform TTS task."""
     print("🎵 Starting TTS task...")
@@ -174,9 +182,7 @@ def tts_task(
 
         if data["status"] == "COMPLETED":
             audio_url = data["tts_output_audio"]
-            local_path = download_file(audio_url, save_dir)
-            print(f"✅ Audio file downloaded: {local_path}")
-            return local_path
+            return audio_url
         elif data["status"] == "FAILED":
             print(f"❌ TTS task failed: {data.get('failure_reason', 'Unknown error')}")
             return None
@@ -243,6 +249,92 @@ def stf_task(
             return None
 
 
+def photo_avatar_task(
+    base_url: str,
+    headers: dict,
+    photo_avatar_input_image: str,
+    photo_avatar_input_audio: str,
+    agent: str = "1",
+):
+    """Perform Photo Avatar task."""
+    print("🎭 Starting Photo Avatar task...")
+    print(f"🖼️ Input image: {photo_avatar_input_image}")
+    print(f"🎵 Input audio: {photo_avatar_input_audio}")
+
+    url = f"{base_url}/api/studio/v1/task/photoavatar/"
+
+    # Remove Content-Type header for multipart/form-data
+    upload_headers = headers.copy()
+    upload_headers.pop("Content-Type", None)
+
+    data = {
+        "agent": agent,
+    }
+    files = {}
+
+    try:
+        if photo_avatar_input_image.startswith(("http://", "https://")):
+            # URL인 경우 data에 추가
+            data["photoavatar_input_image_url"] = photo_avatar_input_image
+        else:
+            # 파일인 경우 files에 추가
+            with open(photo_avatar_input_image, "rb") as f:
+                files["photoavatar_input_image"] = (
+                    os.path.basename(photo_avatar_input_image),
+                    f,
+                    "image/jpeg",
+                )
+
+        if photo_avatar_input_audio.startswith(("http://", "https://")):
+            # URL인 경우 data에 추가
+            data["photoavatar_input_audio_url"] = photo_avatar_input_audio
+        else:
+            # 파일인 경우 files에 추가
+            with open(photo_avatar_input_audio, "rb") as f:
+                files["photoavatar_input_audio"] = (
+                    os.path.basename(photo_avatar_input_audio),
+                    f,
+                    "audio/wav",
+                )
+    except FileNotFoundError as e:
+        print(f"❌ {e}")
+        return None
+
+    if files:
+        response = requests.post(
+            url, headers=upload_headers, data=data, files=files, timeout=30
+        )
+    else:
+        response = requests.post(url, headers=upload_headers, data=data, timeout=30)
+
+    data = response.json()
+    if response.status_code >= 400:
+        print(f"❌ Photo Avatar request failed: {response.status_code}")
+        print(response.text)
+        return None
+
+    print(f"⏳ Photo Avatar task started (Task ID: {data['task_id']})")
+
+    while True:
+        time.sleep(5)
+        response = requests.get(
+            url + f"{data['task_id']}/", headers=headers, timeout=30
+        )
+        data = response.json()
+        print(f"⏳ Photo Avatar task status: {data['status']}")
+
+        if data["status"] == "COMPLETED":
+            video_url = data["photoavatar_output_video"]
+            print("✅ Photo Avatar task completed!")
+            print(f"🎥 Output video: {video_url}")
+            return video_url
+        elif data["status"] == "FAILED":
+            print(
+                f"❌ Photo Avatar task failed: {data.get('failure_reason', 'Unknown error')}"
+            )
+            return None
+
+
 def main():
     # Parse command line arguments
     args = parse_arguments()
@@ -276,22 +368,28 @@ def main():
         print("❌ Error: --tts-text is required for TTS/STF workflow")
         return 1
 
-    # Perform TTS
-    local_audio_path = tts_task(
+    # TTS task
+    audio_url = tts_task(
         base_url=base_url,
         headers=headers,
         tts_text=args.tts_text,
         tts_type=args.tts_type,
         tts_audio_format=args.tts_audio_format,
         agent=args.agent,
-        save_dir=args.save_dir,
     )
+
+    local_audio_path = download_file(audio_url, args.save_dir)
+    print(f"✅ Audio file downloaded: {local_audio_path}")
 
     if not local_audio_path:
         print("❌ TTS task failed.")
         return 1
 
-    # Perform STF (unless skipped)
+    print("\n🎉 TTS task completed successfully!")
+    print(f"🎵 Audio URL: {audio_url}")
+    print(f"🎵 Audio file: {local_audio_path}")
+
+    # STF task
     if not args.skip_stf:
         video_url = stf_task(
             base_url=base_url,
@@ -305,13 +403,27 @@ def main():
             print("❌ STF task failed.")
             return 1
 
-        print("\n🎉 All tasks completed successfully!")
-        print(f"🎵 Audio file: {local_audio_path}")
+        print("\n🎉 STF task completed successfully!")
         print(f"🎥 Video URL: {video_url}")
-    else:
-        print("\n🎉 TTS task completed successfully!")
-        print(f"🎵 Audio file: {local_audio_path}")
 
+    # Photo Avatar task
+    if not args.skip_photo_avatar:
+        video_url = photo_avatar_task(
+            base_url=base_url,
+            headers=headers,
+            photo_avatar_input_image=args.photo_avatar_input_image,
+            photo_avatar_input_audio=audio_url,
+            agent=args.agent,
+        )
+
+        if not video_url:
+            print("❌ Photo Avatar task failed.")
+            return 1
+
+        print("\n🎉 Photo Avatar task completed successfully!")
+        print(f"🎥 Video URL: {video_url}")
+
+    print("\n🎉 All tasks completed successfully!")
     return 0
 
 
