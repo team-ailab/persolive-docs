@@ -23,7 +23,9 @@ Examples:
   
   # Check available types (optional)
   python main.py --check-types tts_type
+  python main.py --check-types stt_type
   python main.py --check-types modelstyle
+  python main.py --check-types mcp_type
   
   # Custom save directory
   python main.py --tts-text "Hello" --save-dir "./my-outputs"
@@ -32,7 +34,8 @@ Examples:
 
     parser.add_argument(
         "--check-types",
-        choices=["tts_type", "modelstyle"],
+        choices=["tts_type", "modelstyle", "stt_type", "mcp_type"],
+        default="mcp_type",
         help="Check available TTS types or model styles",
     )
 
