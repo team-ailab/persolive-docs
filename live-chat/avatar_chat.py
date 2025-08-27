@@ -20,9 +20,10 @@ except ImportError:
 
 
 class AvatarChat:
-    def __init__(self, api_server: str, api_key: str):
+    def __init__(self, api_server: str, api_key: str, llm_version: str = "v2"):
         self.api_server = api_server.rstrip("/")
         self.api_key = api_key
+        self.llm_version = llm_version  # "v1" or "v2"
         self.session_id: Optional[str] = None
         self.chat_history: list[dict[str, str]] = []
         self.capability: list[str] = []  # Store capability information
@@ -120,13 +121,24 @@ class AvatarChat:
 
         print(f"👤 You: {message}")
 
-        # Add to conversation history
-        self.chat_history.append({"role": "Human", "content": message})
+        # LLM API 버전에 따른 분기
+        if self.llm_version == "v1":
+            # v1: 서버에서 히스토리 관리, 클라이언트는 히스토리에 추가하지 않음
+            endpoint = f"{self.api_server}/api/v1/session/{self.session_id}/llm/"
+            request_data = {"message": message, "clear_history": False}
+        else:  # v2
+            # v2: 클라이언트에서 히스토리 관리
+            self.chat_history.append({"role": "user", "content": message})
+            endpoint = f"{self.api_server}/api/v1/session/{self.session_id}/llm/v2/"
+            request_data = {
+                "messages": self.chat_history,
+                "tools": self.tools,
+            }
 
         response = requests.post(
-            f"{self.api_server}/api/v1/session/{self.session_id}/llm/",
+            endpoint,
             headers={"Content-Type": "application/json"},
-            json={"message": message, "tools": self.tools, "clear_history": False},
+            json=request_data,
             stream=True,
         )
 
@@ -141,10 +153,14 @@ class AvatarChat:
                     if line_str.startswith("data: "):
                         try:
                             data = json.loads(line_str[6:])
+                            print(data)
                             if data.get("status") == "success":
                                 sentence = data.get("sentence", "")
                                 print(sentence, end="", flush=True)
                                 ai_response += sentence
+                                tool_calls = data.get("tool_calls", [])
+                                if tool_calls:
+                                    print(f"tool_calls: {tool_calls}")
                             else:
                                 print(
                                     f"❌ Error: {data.get('reason', 'Unknown error')}"
@@ -154,8 +170,10 @@ class AvatarChat:
 
             print()  # New line
 
-            # Add to conversation history
-            self.chat_history.append({"role": "AI", "content": ai_response})
+            # v2에서만 AI 응답을 히스토리에 추가 (v1은 서버에서 관리)
+            if self.llm_version == "v2":
+                self.chat_history.append({"role": "assistant", "content": ai_response})
+
             return ai_response
         else:
             raise Exception(
