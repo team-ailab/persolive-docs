@@ -70,6 +70,16 @@ Before creating content, you can check available TTS types and model styles:
    python main.py --check-types modelstyle
    ```
 
+3. **Check STF types:**
+   ```bash
+   python main.py --check-types stt_type
+   ```
+
+4. **Check MCP types:**
+   ```bash
+   python main.py --check-types mcp_type
+   ```
+
 ### Basic TTS + STF Workflow
 
 The `main.py` script demonstrates a complete AI video generation workflow:
