@@ -145,6 +145,9 @@ class AvatarChat:
         if response.status_code == 200:
             print("🤖 AI: ", end="", flush=True)
             ai_response = ""
+            collected_tool_calls = []
+            collected_tool_messages = []
+            has_tool_calls = False
 
             # Process streaming response
             for line in response.iter_lines():
@@ -153,14 +156,26 @@ class AvatarChat:
                     if line_str.startswith("data: "):
                         try:
                             data = json.loads(line_str[6:])
-                            print(data)
                             if data.get("status") == "success":
                                 sentence = data.get("sentence", "")
                                 print(sentence, end="", flush=True)
                                 ai_response += sentence
-                                tool_calls = data.get("tool_calls", [])
-                                if tool_calls:
-                                    print(f"tool_calls: {tool_calls}")
+
+                                # tool_calls 수집
+                                if data.get("tool_calls"):
+                                    has_tool_calls = True
+                                    collected_tool_calls.extend(
+                                        data.get("tool_calls", [])
+                                    )
+
+                                # tool 메시지 수집
+                                if data.get("tool_call_id"):
+                                    tool_message = {
+                                        "role": "tool",
+                                        "content": data.get("content", ""),
+                                        "tool_call_id": data.get("tool_call_id"),
+                                    }
+                                    collected_tool_messages.append(tool_message)
                             else:
                                 print(
                                     f"❌ Error: {data.get('reason', 'Unknown error')}"
@@ -168,11 +183,50 @@ class AvatarChat:
                         except json.JSONDecodeError:
                             continue
 
-            print()  # New line
-
-            # v2에서만 AI 응답을 히스토리에 추가 (v1은 서버에서 관리)
+            # v2에서만 chat_history 관리
             if self.llm_version == "v2":
-                self.chat_history.append({"role": "assistant", "content": ai_response})
+                new_history = []
+                if has_tool_calls and collected_tool_calls:
+                    # Assistant 메시지 추가
+                    assistant_message = {
+                        "role": "assistant",
+                        "tool_calls": collected_tool_calls,
+                    }
+                    new_history.append(assistant_message)
+
+                    # 누락된 tool message 보완
+                    tool_call_ids = {tc.get("id") for tc in collected_tool_calls}
+                    tool_message_ids = {
+                        tm.get("tool_call_id") for tm in collected_tool_messages
+                    }
+
+                    for missing_id in tool_call_ids - tool_message_ids:
+                        collected_tool_messages.append(
+                            {
+                                "role": "tool",
+                                "content": "Tool execution completed",
+                                "tool_call_id": missing_id,
+                            }
+                        )
+
+                    # Tool 메시지들을 순서대로 추가
+                    tool_call_id_order = [tc.get("id") for tc in collected_tool_calls]
+                    for tool_call_id in tool_call_id_order:
+                        for tool_message in collected_tool_messages:
+                            if tool_message.get("tool_call_id") == tool_call_id:
+                                new_history.append(tool_message)
+                                break
+
+                elif ai_response and not has_tool_calls:
+                    # 일반 Assistant 메시지 추가
+                    self.chat_history.append(
+                        {"role": "assistant", "content": ai_response}
+                    )
+
+                print(new_history)
+                self.chat_history.extend(new_history)
+
+            print()  # New line
 
             return ai_response
         else:
