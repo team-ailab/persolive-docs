@@ -75,6 +75,11 @@ Examples:
         help="Server label (default: empty - use any available server)",
     )
     parser.add_argument(
+        "--perso-plan-name",
+        default="",
+        help="Perso plan name (default: empty - use any available server)",
+    )
+    parser.add_argument(
         "--input-number-of-speakers",
         default=1,
         help="Input number of speakers",
@@ -174,6 +179,7 @@ def main():
         "export_type": "INITIAL_EXPORT",
         "priority": 1,
         "server_label": args.server_label,
+        "perso_plan_name": args.perso_plan_name,
         "project": project_id,
         "target_language": args.target_language,
         "lipsync": args.lipsync,
