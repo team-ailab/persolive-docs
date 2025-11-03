@@ -86,10 +86,11 @@ Examples:
     )
     parser.add_argument(
         "--experiments",
+        default=[],
         help="Experiments",
     )
     parser.add_argument(
-        "--input-file-source-language-subtitle",
+        "--input-file-source-language-subtitle-url",
         help="Input file source language subtitle",
     )
     return parser.parse_args()
