@@ -129,9 +129,7 @@ def main():
 
             print(f"\n📋 Available {args.list_settings}:")
             for i, setting in enumerate(settings, 1):
-                print(
-                    f"{i:2d}. {setting['name']} - {setting.get('display_name', 'N/A')}"
-                )
+                print(f"{i:2d}. {setting['name']}")
 
             return 0
         except Exception as e:
