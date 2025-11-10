@@ -35,7 +35,6 @@ Examples:
     parser.add_argument(
         "--check-types",
         choices=["tts_type", "modelstyle", "stt_type", "mcp_type"],
-        default="mcp_type",
         help="Check available TTS types or model styles",
     )
 
