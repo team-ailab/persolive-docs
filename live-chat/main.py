@@ -34,8 +34,8 @@ Examples:
     # API Configuration
     parser.add_argument(
         "--api-server",
-        default="https://live-api.perso.ai",
-        help="API server URL (default: https://live-api.perso.ai)",
+        required=True,
+        help="API server URL",
     )
     parser.add_argument(
         "--api-key",
@@ -45,27 +45,33 @@ Examples:
     # AI Configuration
     parser.add_argument(
         "--llm-type",
-        default="gpt-35",
-        help="LLM type to use (default: gpt-4o-mini)",
+        required=True,
+        help="LLM type to use",
     )
     parser.add_argument(
-        "--tts-type", default="yuri", help="TTS type to use (default: yuri)"
+        "--tts-type",
+        required=True,
+        help="TTS type to use (default: yuri)",
     )
     parser.add_argument(
         "--stt-type", default="default", help="STT type to use (default: default)"
     )
     parser.add_argument(
         "--model-style",
-        default="yoori-front-khaki_overalls-nodded_loop",
-        help="Avatar model style (default: yuri-front_natural)",
+        required=True,
+        help="Avatar model style",
     )
 
     # Content Configuration
     parser.add_argument(
         "--prompt",
-        help="Prompt ID (default: plp-d432cb910983f1eed6511eba836ac14f)",
+        required=True,
+        help="Prompt ID",
     )
-    parser.add_argument("--document", help="Document ID for AI context (optional)")
+    parser.add_argument(
+        "--document",
+        help="Document ID for AI context (optional)",
+    )
     parser.add_argument(
         "--capability",
         nargs="+",

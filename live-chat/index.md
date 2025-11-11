@@ -120,6 +120,20 @@ python main.py --capability LLM TTS  # Text-only mode
 python main.py --capability LLM      # Chat without audio
 ```
 
+**Text normalization configuration:**
+```bash
+# Use custom text normalization configuration and locale
+python main.py --text_normalization_config "test" --text_normalization_locale "en-US"
+
+# Korean locale
+python main.py --text_normalization_config "test" --text_normalization_locale "ko-KR"
+
+# English locale
+python main.py --text_normalization_config "test" --text_normalization_locale "en-US"
+
+# Japanese locale  
+python main.py --text_normalization_config "test" --text_normalization_locale "ja-JP"
+```
 ### Complete Workflow Example
 
 when you start the chat system, you can see the menu.
@@ -180,41 +194,45 @@ Creates a new chat session with the AI avatar.
 **Request Parameters:**
 ```json
 {
-    "model_style": "string",        // Optional: Avatar model style name (e.g., "yuri-front_natural")
-    "llm_type": "string",           // Optional: LLM type name (e.g., "gpt-35", "gpt-4")
-    "tts_type": "string",           // Optional: TTS type name (e.g., "yuri", "k_idol_m_3_yoon_hajin")
-    "stt_type": "string",           // Optional: STT type name (e.g., "default")
-    "capability": ["string"],       // Optional: Array of capability names (e.g., ["LLM", "TTS", "STT"])
-    "prompt": "string",             // Optional: Prompt ID (e.g., "plp-d432cb910983f1eed6511eba836ac14f")
-    "background_image": "string",   // Optional: Background image ID
-    "document": "string",           // Optional: Document ID (for AI context)
-    "agent": "string",              // Optional: Agent identifier
-    "padding_left": "float",        // Optional: Avatar left padding (-1.0 to 1.0)
-    "padding_top": "float",         // Optional: Avatar top padding (0.0 to 1.0)
-    "padding_height": "float",      // Optional: Avatar height scaling (0 to 5)
-    "extra_data": "object"          // Optional: Additional session data
+    "model_style": "string",                    // Optional: Avatar model style name (e.g., "yuri-front_natural")
+    "llm_type": "string",                       // Optional: LLM type name (e.g., "gpt-35", "gpt-4")
+    "tts_type": "string",                       // Optional: TTS type name (e.g., "yuri", "k_idol_m_3_yoon_hajin")
+    "stt_type": "string",                       // Optional: STT type name (e.g., "default")
+    "capability": ["string"],                   // Optional: Array of capability names (e.g., ["LLM", "TTS", "STT"])
+    "prompt": "string",                         // Optional: Prompt ID (e.g., "plp-d432cb910983f1eed6511eba836ac14f")
+    "background_image": "string",               // Optional: Background image ID
+    "document": "string",                       // Optional: Document ID (for AI context)
+    "agent": "string",                          // Optional: Agent identifier
+    "padding_left": "float",                    // Optional: Avatar left padding (-1.0 to 1.0)
+    "padding_top": "float",                     // Optional: Avatar top padding (0.0 to 1.0)
+    "padding_height": "float",                  // Optional: Avatar height scaling (0 to 5)
+    "text_normalization_config": "string",      // Optional: Text normalization configuration name (e.g., "test")
+    "text_normalization_locale": "string",      // Optional: Text normalization locale (e.g., "en-US", "ko-KR", "ja-JP")
+    "extra_data": "object"                      // Optional: Additional session data
 }
 ```
 
 **Response:**
 ```json
 {
-    "session_id": "string",         // Generated unique session ID
-    "created_at": "datetime",       // Session creation timestamp
-    "status": "CREATED",            // Session status (always CREATED for new sessions)
-    "prompt": "string",             // Prompt ID if provided
-    "capability": ["string"],       // Array of capability names
-    "document": "string",           // Document ID if provided
-    "llm_type": "string",           // LLM type name if provided
-    "tts_type": "string",           // TTS type name if provided
-    "stt_type": "string",           // STT type name if provided
-    "model_style": "string",        // Model style name if provided
-    "agent": "string",              // Agent identifier if provided
-    "padding_left": "float",        // Avatar left padding if provided
-    "padding_top": "float",         // Avatar top padding if provided
-    "padding_height": "float",      // Avatar height scaling if provided
-    "background_image": "string",   // Background image ID if provided
-    "extra_data": "object"          // Additional session data if provided
+    "session_id": "string",                     // Generated unique session ID
+    "created_at": "datetime",                   // Session creation timestamp
+    "status": "CREATED",                        // Session status (always CREATED for new sessions)
+    "prompt": "string",                         // Prompt ID if provided
+    "capability": ["string"],                   // Array of capability names
+    "document": "string",                       // Document ID if provided
+    "llm_type": "string",                       // LLM type name if provided
+    "tts_type": "string",                       // TTS type name if provided
+    "stt_type": "string",                       // STT type name if provided
+    "model_style": "string",                    // Model style name if provided
+    "agent": "string",                          // Agent identifier if provided
+    "padding_left": "float",                    // Avatar left padding if provided
+    "padding_top": "float",                     // Avatar top padding if provided
+    "padding_height": "float",                  // Avatar height scaling if provided
+    "text_normalization_config": "string",      // Text normalization config if provided
+    "text_normalization_locale": "string",      // Text normalization locale if provided
+    "background_image": "string",               // Background image ID if provided
+    "extra_data": "object"                      // Additional session data if provided
 }
 ```
 
