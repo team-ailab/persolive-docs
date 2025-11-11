@@ -83,6 +83,14 @@ Examples:
         default=[],
         help="Tools for MCP",
     )
+    parser.add_argument(
+        "--text_normalization_config",
+        help="Text normalization config name (optional)",
+    )
+    parser.add_argument(
+        "--text_normalization_locale",
+        help="Text normalization locale (optional)",
+    )
 
     # Settings Query
     parser.add_argument(
@@ -148,6 +156,8 @@ def main():
     AGENT = args.agent
     MCP_SERVERS = args.mcp_servers
     TOOLS = args.tools
+    TEXT_NORMALIZATION_CONFIG = args.text_normalization_config
+    TEXT_NORMALIZATION_LOCALE = args.text_normalization_locale
 
     if not API_KEY:
         print(
@@ -192,6 +202,8 @@ def main():
                     agent=AGENT,
                     mcp_servers=MCP_SERVERS,
                     tools=TOOLS,
+                    text_normalization_config=TEXT_NORMALIZATION_CONFIG,
+                    text_normalization_locale=TEXT_NORMALIZATION_LOCALE,
                 )
                 chat.start_session()
                 session_created = True

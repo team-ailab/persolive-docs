@@ -49,6 +49,8 @@ class AvatarChat:
         agent: Optional[str] = None,
         mcp_servers: Optional[str] = None,
         tools: Optional[list[str]] = None,
+        text_normalization_config: Optional[str] = None,
+        text_normalization_locale: Optional[str] = None,
     ) -> Optional[str]:
         """Create session for text and voice chat"""
         print("📝 Creating session...")
@@ -73,6 +75,10 @@ class AvatarChat:
             data["mcp_servers"] = mcp_servers
         if tools:
             self.tools = tools  # Store for later use
+        if text_normalization_config:
+            data["text_normalization_config"] = text_normalization_config
+        if text_normalization_locale:
+            data["text_normalization_locale"] = text_normalization_locale
 
         response = requests.post(
             f"{self.api_server}/api/v1/session/",
