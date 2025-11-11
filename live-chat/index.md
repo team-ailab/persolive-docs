@@ -107,7 +107,7 @@ python main.py --list-settings modelstyle
 
 **API server and API key configuration:**
 ```bash
-python main.py --api-server "https://live-api.perso.ai" --api-key "your-api-key"
+python main.py --api-server "https://platform.perso.ai" --api-key "your-api-key"
 ```
 
 **Capability selection:**

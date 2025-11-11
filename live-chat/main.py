@@ -120,18 +120,19 @@ def main():
     # Parse command line arguments
     args = parse_arguments()
 
+    API_KEY = args.api_key or os.environ.get("EST_LIVE_API_KEY")
+
+    if not API_KEY:
+        print(
+            "❌ Error: API key is required. Provide it via --api-key argument or EST_LIVE_API_KEY environment variable."
+        )
+        return 1
+
     # Handle settings query and exit
     if args.list_settings:
         try:
-            API_SERVER = args.api_server
-            API_KEY = args.api_key or os.environ.get("EST_LIVE_API_KEY")
-
-            if not API_KEY:
-                print("❌ Error: API key is required for settings query.")
-                return 1
-
             # Create temporary chat instance for settings query
-            temp_chat = AvatarChat(API_SERVER, API_KEY)
+            temp_chat = AvatarChat(args.api_server, API_KEY)
             settings = temp_chat.get_available_settings(args.list_settings)
 
             print(f"\n📋 Available {args.list_settings}:")
@@ -143,34 +144,12 @@ def main():
             print(f"❌ Error getting settings: {e}")
             return 1
 
-    # Set up configuration from arguments
-    API_SERVER = args.api_server
-    API_KEY = args.api_key or os.environ.get("EST_LIVE_API_KEY")
-    LLM_TYPE = args.llm_type
-    TTS_TYPE = args.tts_type
-    STT_TYPE = args.stt_type
-    MODEL_STYLE = args.model_style
-    PROMPT = args.prompt
-    DOCUMENT = args.document
-    CAPABILITY = args.capability
-    AGENT = args.agent
-    MCP_SERVERS = args.mcp_servers
-    TOOLS = args.tools
-    TEXT_NORMALIZATION_CONFIG = args.text_normalization_config
-    TEXT_NORMALIZATION_LOCALE = args.text_normalization_locale
-
-    if not API_KEY:
-        print(
-            "❌ Error: API key is required. Provide it via --api-key argument or EST_LIVE_API_KEY environment variable."
-        )
-        return 1
-
     print("🚀 AI Avatar Chat System starting!")
-    print(f"🔗 API Server: {API_SERVER}")
+    print(f"🔗 API Server: {args.api_server}")
     print("=" * 50)
 
     # Initialize avatar chat instance (but don't create session yet)
-    chat = AvatarChat(API_SERVER, API_KEY)
+    chat = AvatarChat(args.api_server, API_KEY)
     session_created = False
 
     try:
@@ -180,30 +159,32 @@ def main():
 
             # For options that need Python session, create it if not exists
             if choice in ["1", "2", "3", "4", "6"] and not session_created:
-                print(f"🤖 LLM Type: {LLM_TYPE}")
-                print(f"🔊 TTS Type: {TTS_TYPE}")
-                print(f"🎤 STT Type: {STT_TYPE}")
-                print(f"👤 Model Style: {MODEL_STYLE}")
-                print(f"📝 Prompt ID: {PROMPT}")
-                if DOCUMENT:
-                    print(f"📄 Document ID: {DOCUMENT}")
-                print(f"⚡ Capabilities: {', '.join(CAPABILITY)}")
+                print(f"🤖 LLM Type: {args.llm_type}")
+                print(f"🔊 TTS Type: {args.tts_type}")
+                print(f"🎤 STT Type: {args.stt_type}")
+                print(f"👤 Model Style: {args.model_style}")
+                print(f"📝 Prompt ID: {args.prompt}")
+                if args.document:
+                    print(f"📄 Document ID: {args.document}")
+                print(f"📝 Text Normalization Config: {args.text_normalization_config}")
+                print(f"📝 Text Normalization Locale: {args.text_normalization_locale}")
+                print(f"⚡ Capabilities: {', '.join(args.capability)}")
                 print("=" * 50)
 
                 # Create and start session
                 chat.create_session(
-                    llm_type=LLM_TYPE,
-                    tts_type=TTS_TYPE,
-                    stt_type=STT_TYPE,
-                    model_style=MODEL_STYLE,
-                    prompt=PROMPT,
-                    document=DOCUMENT,
-                    capability=CAPABILITY,
-                    agent=AGENT,
-                    mcp_servers=MCP_SERVERS,
-                    tools=TOOLS,
-                    text_normalization_config=TEXT_NORMALIZATION_CONFIG,
-                    text_normalization_locale=TEXT_NORMALIZATION_LOCALE,
+                    llm_type=args.llm_type,
+                    tts_type=args.tts_type,
+                    stt_type=args.stt_type,
+                    model_style=args.model_style,
+                    prompt=args.prompt,
+                    document=args.document,
+                    capability=args.capability,
+                    agent=args.agent,
+                    mcp_servers=args.mcp_servers,
+                    tools=args.tools,
+                    text_normalization_config=args.text_normalization_config,
+                    text_normalization_locale=args.text_normalization_locale,
                 )
                 chat.start_session()
                 session_created = True
