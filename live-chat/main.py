@@ -63,7 +63,6 @@ Examples:
     # Content Configuration
     parser.add_argument(
         "--prompt",
-        default="plp-d432cb910983f1eed6511eba836ac14f",
         help="Prompt ID (default: plp-d432cb910983f1eed6511eba836ac14f)",
     )
     parser.add_argument("--document", help="Document ID for AI context (optional)")
