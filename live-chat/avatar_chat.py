@@ -113,12 +113,12 @@ class AvatarChat:
             json={"event": "SESSION_START", "detail": "Session started via Python"},
         )
 
-        if response.status_code == 201:
-            print("✅ Session has been started.")
-        else:
+        if response.status_code >= 400:
             raise Exception(
                 f"Session start failed: {response.status_code} - {response.text}"
             )
+        else:
+            print("✅ Session has been started.")
 
     def chat_text(self, message: str) -> str:
         """Chat with AI using text"""
