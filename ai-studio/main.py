@@ -49,13 +49,11 @@ Examples:
     # TTS/STF arguments (required when not checking types)
     parser.add_argument(
         "--tts-type",
-        default="yuri",
-        help="TTS type to use (default: yuri)",
+        help="TTS type",
     )
     parser.add_argument(
         "--stf-model-style",
-        default="yoori-front-khaki_overalls-nodded_loop",
-        help="STF model style (default: yuri-front_natural)",
+        help="STF model style",
     )
     parser.add_argument(
         "--tts-audio-format",
@@ -76,6 +74,7 @@ Examples:
     parser.add_argument(
         "--api-key",
         help="API key (if not provided, will use EST_LIVE_API_KEY environment variable)",
+        required=True,
     )
     parser.add_argument(
         "--webhook_url",
@@ -391,12 +390,12 @@ def main():
         webhook_url=args.webhook_url,
     )
 
-    local_audio_path = download_file(audio_url, args.save_dir)
-    print(f"✅ Audio file downloaded: {local_audio_path}")
-
-    if not local_audio_path:
+    if not audio_url:
         print("❌ TTS task failed.")
         return 1
+
+    local_audio_path = download_file(audio_url, args.save_dir)
+    print(f"✅ Audio file downloaded: {local_audio_path}")
 
     print("\n🎉 TTS task completed successfully!")
     print(f"🎵 Audio URL: {audio_url}")
@@ -422,6 +421,12 @@ def main():
 
     # Photo Avatar task
     if not args.skip_photo_avatar:
+        if not args.photo_avatar_input_image:
+            print(
+                "❌ Error: --photo-avatar-input-image is required for Photo Avatar task"
+            )
+            return 1
+
         video_url = photo_avatar_task(
             base_url=base_url,
             headers=headers,
