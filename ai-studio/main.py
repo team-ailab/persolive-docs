@@ -31,6 +31,15 @@ Examples:
   python main.py --tts-text "Hello" --save-dir "./my-outputs"
         """,
     )
+    parser.add_argument(
+        "--base-url",
+        default="https://platform.perso.ai",
+        help="API base URL (default: https://platform.perso.ai)",
+    )
+    parser.add_argument(
+        "--api-key",
+        help="API key (if not provided, will use EST_LIVE_API_KEY environment variable)",
+    )
 
     parser.add_argument(
         "--check-types",
@@ -60,21 +69,11 @@ Examples:
         default="wav_16bit_32000hz_mono",
         help="TTS audio format (default: wav_16bit_32000hz_mono)",
     )
-    parser.add_argument(
-        "--base-url",
-        default="https://live-api.perso.ai",
-        help="API base URL (default: https://live-api.perso.ai)",
-    )
     parser.add_argument("--agent", default="1", help="Agent ID (default: 1)")
     parser.add_argument(
         "--save-dir",
         default="user-uploads",
         help="Directory to save downloaded files (default: user-uploads)",
-    )
-    parser.add_argument(
-        "--api-key",
-        help="API key (if not provided, will use EST_LIVE_API_KEY environment variable)",
-        required=True,
     )
     parser.add_argument(
         "--webhook_url",
