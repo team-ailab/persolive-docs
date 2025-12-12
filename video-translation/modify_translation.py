@@ -67,6 +67,21 @@ Examples:
         default="",
         help="Server label (default: empty - use any available server)",
     )
+    parser.add_argument(
+        "--source-export",
+        help="Source export ID (required for VIDEO_TRANSLATION export_mode)",
+    )
+    parser.add_argument(
+        "--export-mode",
+        default="AUDIO_TRANSLATION",
+        choices=[
+            "AUDIO_STT_ONLY",
+            "AUDIO_TRANSLATION",
+            "AUDIO_VIDEO_TRANSLATION",
+            "VIDEO_TRANSLATION",
+        ],
+        help="Export mode (default: AUDIO_TRANSLATION)",
+    )
 
     return parser.parse_args()
 
@@ -123,6 +138,8 @@ def create_proofread_export(
     headers,
     project_id,
     target_language,
+    export_mode="AUDIO_TRANSLATION",
+    source_export=None,
     lipsync=False,
     watermark=True,
     server_label="",
@@ -130,17 +147,21 @@ def create_proofread_export(
     """Create a new export with modified translations"""
     url = f"{base_url}/api/video_translator/v2/export/"
 
-    payload = json.dumps(
-        {
-            "export_type": "PROOFREAD_EXPORT",
-            "server_label": server_label,
-            "priority": 0,
-            "project": project_id,
-            "target_language": target_language,
-            "lipsync": lipsync,
-            "watermark": watermark,
-        }
-    )
+    payload = {
+        "export_type": "PROOFREAD_EXPORT",
+        "server_label": server_label,
+        "priority": 0,
+        "project": project_id,
+        "export_mode": export_mode,
+        "target_language": target_language,
+        "lipsync": lipsync,
+        "watermark": watermark,
+    }
+
+    if source_export:
+        payload["source_export"] = source_export
+
+    payload = json.dumps(payload)
 
     response = requests.post(url, headers=headers, data=payload, timeout=30)
 
@@ -233,6 +254,8 @@ def main():
             headers,
             args.project_id,
             args.target_language,
+            args.export_mode,
+            args.source_export,
             args.lipsync,
             watermark,
             args.server_label,
