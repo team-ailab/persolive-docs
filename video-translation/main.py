@@ -21,6 +21,15 @@ Examples:
 
     # Required arguments
     parser.add_argument(
+        "--base-url",
+        default="https://platform.perso.ai",
+        help="API base URL (default: https://platform.perso.ai)",
+    )
+    parser.add_argument(
+        "--api-key",
+        help="API key",
+    )
+    parser.add_argument(
         "--input-file-url",
         default="https://samoonsikpoc.blob.core.windows.net/moonsikpoc/우영우_1_kor.mp4",
         help="Public URL to the input video file",
@@ -46,11 +55,6 @@ Examples:
         help="Language dictionary URL",
     )
     parser.add_argument(
-        "--base-url",
-        default="https://live-api.perso.ai",
-        help="API base URL (default: https://live-api.perso.ai)",
-    )
-    parser.add_argument(
         "--lipsync",
         action="store_true",
         help="Enable lip-sync in the output video",
@@ -59,10 +63,6 @@ Examples:
         "--no-watermark",
         action="store_true",
         help="Disable watermark in the output video",
-    )
-    parser.add_argument(
-        "--api-key",
-        help="API key (if not provided, will use EST_LIVE_API_KEY environment variable)",
     )
     parser.add_argument(
         "--input-file-video-duration-sec",

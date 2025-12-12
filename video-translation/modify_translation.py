@@ -20,6 +20,15 @@ Examples:
 
     # Required arguments
     parser.add_argument(
+        "--base-url",
+        default="https://platform.perso.ai",
+        help="API base URL (default: https://platform.perso.ai)",
+    )
+    parser.add_argument(
+        "--api-key",
+        help="API key (if not provided, will use EST_LIVE_API_KEY environment variable)",
+    )
+    parser.add_argument(
         "--project-id",
         required=True,
         help="Project ID from the initial translation",
@@ -41,24 +50,17 @@ Examples:
 
     # Optional arguments
     parser.add_argument(
-        "--base-url",
-        default="https://live-api.perso.ai",
-        help="API base URL (default: https://live-api.perso.ai)",
-    )
-    parser.add_argument(
         "--target-language", default="en", help="Target language code (default: en)"
     )
     parser.add_argument(
-        "--lipsync", action="store_true", help="Enable lip-sync in the output video"
+        "--lipsync",
+        action="store_true",
+        help="Enable lip-sync in the output video",
     )
     parser.add_argument(
         "--no-watermark",
         action="store_true",
         help="Disable watermark in the output video",
-    )
-    parser.add_argument(
-        "--api-key",
-        help="API key (if not provided, will use EST_LIVE_API_KEY environment variable)",
     )
     parser.add_argument(
         "--server-label",
