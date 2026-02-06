@@ -91,7 +91,7 @@ Examples:
     )
     parser.add_argument(
         "--text_normalization_config",
-        help="Text normalization config name (optional)",
+        help="Text normalization config id (optional)",
     )
     parser.add_argument(
         "--text_normalization_locale",
