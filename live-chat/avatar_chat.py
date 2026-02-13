@@ -163,9 +163,10 @@ class AvatarChat:
                         try:
                             data = json.loads(line_str[6:])
                             if data.get("status") == "success":
-                                sentence = data.get("sentence", "")
-                                print(sentence, end="", flush=True)
-                                ai_response += sentence
+                                content = data.get("content", "")
+                                if content:
+                                    print(content, end="", flush=True)
+                                    ai_response += content
 
                                 # tool_calls 수집
                                 if data.get("tool_calls"):
@@ -229,8 +230,9 @@ class AvatarChat:
                         {"role": "assistant", "content": ai_response}
                     )
 
-                print(new_history)
-                self.chat_history.extend(new_history)
+                if new_history:
+                    print(new_history)
+                    self.chat_history.extend(new_history)
 
             print()  # New line
 
@@ -240,12 +242,23 @@ class AvatarChat:
                 f"LLM request failed: {response.status_code} - {response.text}"
             )
 
-    def generate_speech(self, text: str, save_path: Optional[str] = None) -> bytes:
-        """Convert text to speech"""
+    def generate_speech(
+        self, text: str, save_path: Optional[str] = None, streaming: bool = False
+    ) -> bytes:
+        """Convert text to speech
+
+        Args:
+            text: Text to convert to speech
+            save_path: Optional path to save audio file
+            streaming: If True, use streaming TTS endpoint
+        """
         if not self.session_id:
             raise Exception("Session has not been started.")
 
         print("🔊 Generating speech...")
+
+        if streaming:
+            return self.generate_speech_streaming(text, save_path)
 
         response = requests.post(
             f"{self.api_server}/api/v1/session/{self.session_id}/tts/",
@@ -266,6 +279,65 @@ class AvatarChat:
         else:
             raise Exception(
                 f"TTS request failed: {response.status_code} - {response.text}"
+            )
+
+    def generate_speech_streaming(
+        self, text: str, save_path: Optional[str] = None
+    ) -> bytes:
+        """Convert text to speech with streaming response"""
+        if not self.session_id:
+            raise Exception("Session has not been started.")
+
+        response = requests.post(
+            f"{self.api_server}/api/v1/session/{self.session_id}/streaming_tts/",
+            headers={"Content-Type": "application/json"},
+            json={"text": text},
+            stream=True,
+        )
+
+        if response.status_code == 200:
+            audio_chunks = []
+            for chunk in response.iter_content(chunk_size=4096):
+                if chunk:
+                    audio_chunks.append(chunk)
+
+            audio_data = b"".join(audio_chunks)
+
+            if save_path:
+                with open(save_path, "wb") as f:
+                    f.write(audio_data)
+                print(f"💾 Audio file saved: {save_path}")
+
+            return audio_data
+        else:
+            raise Exception(
+                f"TTS streaming request failed: {response.status_code} - {response.text}"
+            )
+
+    def generate_speech_streaming_iter(self, text: str):
+        """Convert text to speech with streaming response (iterator version)
+
+        Yields audio chunks as they are received from the server.
+        Useful for real-time audio playback.
+        """
+        if not self.session_id:
+            raise Exception("Session has not been started.")
+
+        response = requests.post(
+            f"{self.api_server}/api/v1/session/{self.session_id}/tts/streaming/",
+            headers={"Content-Type": "application/json"},
+            json={"text": text},
+            stream=True,
+            verify=False,
+        )
+
+        if response.status_code == 200:
+            for chunk in response.iter_content(chunk_size=4096):
+                if chunk:
+                    yield chunk
+        else:
+            raise Exception(
+                f"TTS streaming request failed: {response.status_code} - {response.text}"
             )
 
     def recognize_speech(self, audio_file_path: str) -> str:
