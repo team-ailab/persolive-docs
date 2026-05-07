@@ -105,6 +105,12 @@ Examples:
         help="List available settings and exit",
     )
 
+    parser.add_argument(
+        "--streaming",
+        action="store_true",
+        help="Use streaming TTS endpoint (raw PCM 24kHz/s16le/mono, wrapped to WAV on save)",
+    )
+
     return parser.parse_args()
 
 
@@ -206,16 +212,25 @@ def main():
                     if user_input:
                         ai_response = chat.chat_text(user_input)
 
-                        # Ask if user wants TTS
-                        tts_choice = (
-                            input("\n🔊 Would you like to hear it as speech? (y/N): ")
-                            .strip()
-                            .lower()
-                        )
-                        if tts_choice == "y":
-                            tts_file = f"ai_response_{int(time.time())}.wav"
+                    # Ask if user wants TTS
+                    tts_choice = (
+                        input("\n🔊 Would you like to hear it as speech? (y/N): ")
+                        .strip()
+                        .lower()
+                    )
+                    if tts_choice == "y":
+                        tts_file = f"ai_response_{int(time.time())}.wav"
+                        if args.streaming:
+                            pcm = chat.generate_speech(ai_response, streaming=True)
+                            with wave.open(tts_file, "wb") as w:
+                                w.setnchannels(1)
+                                w.setsampwidth(2)
+                                w.setframerate(24000)
+                                w.writeframes(pcm)
+                            print(f"💾 Audio file saved: {tts_file}")
+                        else:
                             chat.generate_speech(ai_response, tts_file)
-                            chat.play_audio(tts_file)
+                        chat.play_audio(tts_file)
 
             elif choice == "2":
                 # Voice chat
@@ -245,7 +260,16 @@ def main():
 
                     # Generate TTS
                     tts_file = f"ai_response_{int(time.time())}.wav"
-                    chat.generate_speech(ai_response, tts_file)
+                    if args.streaming:
+                        pcm = chat.generate_speech(ai_response, streaming=True)
+                        with wave.open(tts_file, "wb") as w:
+                            w.setnchannels(1)
+                            w.setsampwidth(2)
+                            w.setframerate(24000)
+                            w.writeframes(pcm)
+                        print(f"💾 Audio file saved: {tts_file}")
+                    else:
+                        chat.generate_speech(ai_response, tts_file)
                     chat.play_audio(tts_file)
 
                 except Exception as e:
